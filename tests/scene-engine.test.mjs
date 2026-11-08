@@ -68,8 +68,8 @@ test("una solicitud más reciente invalida una carga anterior", async () => {
   assert.equal(engine.currentScene.id, "SC-02");
 });
 
-test("no permite usar el motor después de destruirlo", () => {
+test("no permite usar el motor después de destruirlo", async () => {
   const engine = new SceneEngine({ scenes });
   engine.destroy();
-  assert.throws(() => engine.start(), /destruido/);
+  await assert.rejects(engine.start(), /destruido/);
 });
