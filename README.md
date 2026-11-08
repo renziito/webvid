@@ -17,7 +17,8 @@ webvid/
 ├── .github/workflows/pages.yml
 ├── engine/
 │   ├── scene-engine.mjs
-│   └── virtual-camera-engine.mjs
+│   ├── virtual-camera-engine.mjs
+│   └── gesture-controller.mjs
 ├── experiencias/
 │   └── <slug>/
 │       ├── index.html
