@@ -3,6 +3,7 @@ const SHELL_CACHE = `webvid-shell-${VERSION}`;
 const RUNTIME_CACHE = `webvid-runtime-${VERSION}`;
 const MAX_RUNTIME_ENTRIES = 120;
 const MAX_RUNTIME_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const MAX_CACHEABLE_RESOURCE_BYTES = 80 * 1024 * 1024;
 const APP_SCOPE = new URL(self.registration.scope);
 const APP_ROOT = APP_SCOPE.pathname.endsWith("/") ? APP_SCOPE.pathname : `${APP_SCOPE.pathname}/`;
 
@@ -36,10 +37,12 @@ function normalizedRequest(request) {
 }
 
 async function putWithTimestamp(cache, request, response) {
-  if (!response || !response.ok || response.type === "opaque") return;
+  if (!response || response.status !== 200 || response.type === "opaque") return;
+  const contentLength = Number(response.headers.get("Content-Length") || 0);
+  if (contentLength > MAX_CACHEABLE_RESOURCE_BYTES) return;
   const headers = new Headers(response.headers);
   headers.set("X-WebVid-Cached-At", String(Date.now()));
-  const stamped = new Response(await response.clone().arrayBuffer(), {
+  const stamped = new Response(response.clone().body, {
     status: response.status,
     statusText: response.statusText,
     headers
@@ -160,6 +163,58 @@ self.addEventListener("message", event => {
     event.waitUntil(caches.delete(RUNTIME_CACHE));
   }
 });
+
+async function handleRangeRequest(request) {
+  const url = new URL(request.url);
+  const fullRequest = new Request(url.href, { credentials: "same-origin" });
+  const runtime = await caches.open(RUNTIME_CACHE);
+  const cached = await runtime.match(fullRequest);
+
+  if (cached) {
+    const range = request.headers.get("Range") || "";
+    const match = /^bytes=(\\d*)-(\\d*)$/.exec(range);
+    if (!match) return new Response(null, { status: 416 });
+
+    const buffer = await cached.arrayBuffer();
+    const size = buffer.byteLength;
+    let start = match[1] ? Number(match[1]) : 0;
+    let end = match[2] ? Number(match[2]) : size - 1;
+
+    if (!match[1] && match[2]) {
+      const suffixLength = Number(match[2]);
+      start = Math.max(0, size - suffixLength);
+      end = size - 1;
+    }
+
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+        start < 0 || start >= size || end < start) {
+      return new Response(null, {
+        status: 416,
+        headers: { "Content-Range": `bytes */${size}` }
+      });
+    }
+
+    end = Math.min(end, size - 1);
+    const headers = new Headers(cached.headers);
+    headers.set("Accept-Ranges", "bytes");
+    headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
+    headers.set("Content-Length", String(end - start + 1));
+    return new Response(buffer.slice(start, end + 1), {
+      status: 206,
+      statusText: "Partial Content",
+      headers
+    });
+  }
+
+  try {
+    return await fetch(request);
+  } catch {
+    return new Response("Vídeo no disponible sin conexión. Descarga la experiencia mientras tengas conexión.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" }
+    });
+  }
+}
 
 self.addEventListener("fetch", event => {
   const request = event.request;
