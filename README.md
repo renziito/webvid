@@ -16,7 +16,8 @@ Una experiencia solo se incorpora a la biblioteca pública después de la aproba
 webvid/
 ├── .github/workflows/pages.yml
 ├── engine/
-│   └── scene-engine.mjs
+│   ├── scene-engine.mjs
+│   └── virtual-camera-engine.mjs
 ├── experiencias/
 │   └── <slug>/
 │       ├── index.html
@@ -28,6 +29,7 @@ webvid/
 │   └── validate-catalog.mjs
 ├── tests/
 │   ├── scene-engine.test.mjs
+│   ├── virtual-camera-engine.test.mjs
 │   └── validate-catalog.test.mjs
 ├── experiencias.json
 ├── index.html
@@ -41,15 +43,13 @@ Cada experiencia publicada debe incluir `index.html`, `styles.css`, `script.js`,
 
 ## Scene Engine
 
-El módulo `engine/scene-engine.mjs` administra la secuencia de escenas, su preparación y activación, y el estado de la escena actual. Cada escena utiliza un ID estable como `SC-01`. Los gestos, la cámara virtual y las transiciones visuales se implementarán en módulos posteriores.
+El módulo `engine/scene-engine.mjs` administra la secuencia de escenas, su preparación y activación, y el estado de la escena actual. Cada escena utiliza un ID estable como `SC-01`.
 
-API inicial:
-- `start(index)`: inicia una escena.
-- `goTo(index)`: prepara y activa una escena concreta.
-- `next()` / `previous()`: avanza o retrocede una escena.
-- `on("scenechange", callback)`: escucha cambios de escena.
-- `getSnapshot()`: devuelve el estado actual.
-- `destroy()`: libera el motor.
+## Virtual Camera Engine
+
+El módulo `engine/virtual-camera-engine.mjs` calcula el encuadre de una escena mediante keyframes de posición, escala y rotación. Recibe un progreso normalizado entre 0 y 1 y devuelve un transform CSS. No administra el tiempo ni crea animaciones autónomas: el reproductor controlará el progreso para mantener sincronizados cámara y duración de escena.
+
+Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final. Los gestos y las transiciones visuales se implementarán en módulos posteriores.
 
 ## PWA y funcionamiento offline
 
@@ -63,6 +63,8 @@ API inicial:
 
 Cada push a `main` ejecuta GitHub Actions. El workflow comprueba la sintaxis JavaScript, ejecuta pruebas automáticas, valida campos y estructura del catálogo, comprueba referencias locales en HTML/CSS/JavaScript y ensambla el sitio en `dist/`. Si una comprobación falla, el despliegue se detiene.
 
+Node.js se utiliza únicamente en GitHub Actions para validar y probar el código. La experiencia publicada se ejecuta en el navegador con HTML, CSS y JavaScript nativo; no necesita un servidor Node.js.
+
 Las GitHub Actions se fijan mediante SHA completo y comentario de versión para evitar que una etiqueta mutable cambie silenciosamente.
 
 Los guiones y documentos de producción no deben guardarse en este repositorio público. Excluirlos del artefacto de Pages no los vuelve privados si se comprometen en GitHub.
@@ -71,7 +73,7 @@ Los guiones y documentos de producción no deben guardarse en este repositorio p
 
 Para probar la PWA debe servirse desde un origen HTTP(S); abrir `index.html` directamente como archivo no habilita Service Workers.
 
-El workflow valida el catálogo y el motor. Las pruebas de instalación real, caché offline, gestos y rendimiento móvil deben completarse en un navegador Android, idealmente en Samsung S25.
+El workflow valida el catálogo y los motores. Las pruebas de instalación real, caché offline, gestos y rendimiento móvil deben completarse en un navegador Android, idealmente en Samsung S25.
 
 ## Sitio
 
