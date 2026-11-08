@@ -20,7 +20,8 @@ webvid/
 │   ├── virtual-camera-engine.mjs
 │   ├── gesture-controller.mjs
 │   ├── scene-player.mjs
-│   └── scene-player.css
+│   ├── scene-player.css
+│   └── transition-engine.mjs
 ├── experiencias/
 │   └── <slug>/
 │       ├── index.html
@@ -64,9 +65,9 @@ El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante P
 
 ## Scene Player
 
-`engine/scene-player.mjs` integra los tres motores. Recibe un elemento raíz y una lista de escenas, crea dos capas visuales, decodifica y precarga el recurso siguiente, conecta los swipes con la navegación y sincroniza el movimiento de cámara con la duración de la escena. El movimiento termina al completar su duración, pero la escena permanece activa hasta otro swipe o una llamada explícita a `next()`, `previous()` o `goTo()`.
+`engine/scene-player.mjs` integra los cuatro motores. Recibe un elemento raíz y una lista de escenas, crea dos capas visuales, decodifica y precarga el recurso siguiente, conecta los swipes con la navegación y sincroniza el movimiento de cámara con la duración de la escena. El movimiento termina al completar su duración, pero la escena permanece activa hasta otro swipe o una llamada explícita a `next()`, `previous()` o `goTo()`.
 
-Cada escena requiere un `id` estable y una ruta `src` (o `image.src`). Puede incluir `alt`, `duration` en segundos y `camera` con `from`, `to` y `easing`. La opción `gestures: false` desactiva los swipes. La preferencia `prefers-reduced-motion` se respeta automáticamente o puede fijarse con `reducedMotion`.
+Cada escena requiere un `id` estable y una ruta `src` (o `image.src`). Puede incluir `alt`, `duration` en segundos y `camera` con `from`, `to` y `easing`. El retroceso del sistema dispone de una entrada de historial de resguardo para devolver al usuario a la biblioteca, incluso al abrir una experiencia directamente. La opción `gestures: false` desactiva los swipes. La preferencia `prefers-reduced-motion` se respeta automáticamente o puede fijarse con `reducedMotion`.
 
 Para montar el reproductor en una experiencia, importa `ScenePlayer` desde `../../engine/scene-player.mjs`, carga `../../engine/scene-player.css` y proporciona un contenedor vacío de pantalla completa. El módulo no añade texto, botones, indicadores ni audio.
 
