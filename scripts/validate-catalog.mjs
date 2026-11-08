@@ -196,10 +196,10 @@ for (const [index, item] of catalog.experiences.entries()) {
     fail(`${slug}/index.html no parece un documento HTML completo.`);
   }
 
+  checkExperiencePresentation(html, css, js, slug);
   checkHtmlReferences(html, htmlFile, directory, slug);
   checkCssReferences(css, cssFile, directory, slug);
   checkJavaScriptReferences(js, jsFile, directory, slug);
-  checkExperiencePresentation(html, css, js, slug);
 
   try {
     execFileSync(process.execPath, ["--check", jsFile], { stdio: "pipe" });
