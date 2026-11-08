@@ -1,59 +1,200 @@
-const CACHE_NAME = "webvid-shell-v2";
+const VERSION = "v3";
+const SHELL_CACHE = `webvid-shell-${VERSION}`;
+const RUNTIME_CACHE = `webvid-runtime-${VERSION}`;
+const MAX_RUNTIME_ENTRIES = 120;
+const MAX_RUNTIME_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const APP_SCOPE = new URL(self.registration.scope);
+const APP_ROOT = APP_SCOPE.pathname.endsWith("/") ? APP_SCOPE.pathname : `${APP_SCOPE.pathname}/`;
+
 const APP_SHELL = [
-  "/webvid/",
-  "/webvid/index.html",
-  "/webvid/manifest.webmanifest",
-  "/webvid/icon.svg",
-  "/webvid/experiencias.json"
+  new URL("./", APP_SCOPE).href,
+  new URL("index.html", APP_SCOPE).href,
+  new URL("manifest.webmanifest", APP_SCOPE).href,
+  new URL("icon.svg", APP_SCOPE).href,
+  new URL("icon-maskable.svg", APP_SCOPE).href,
+  new URL("experiencias.json", APP_SCOPE).href
 ];
 
+function isInScope(url) {
+  return url.origin === APP_SCOPE.origin && url.pathname.startsWith(APP_ROOT);
+}
+
+function normalizedRequest(request) {
+  const url = new URL(request.url);
+  if (url.pathname === APP_ROOT || url.pathname === `${APP_ROOT}index.html` ||
+      url.pathname === `${APP_ROOT}experiencias.json`) {
+    url.search = "";
+    url.hash = "";
+  }
+  return new Request(url.href, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: request.headers,
+    mode: "same-origin",
+    redirect: "follow"
+  });
+}
+
+async function putWithTimestamp(cache, request, response) {
+  if (!response || !response.ok || response.type === "opaque") return;
+  const headers = new Headers(response.headers);
+  headers.set("X-WebVid-Cached-At", String(Date.now()));
+  const stamped = new Response(await response.clone().arrayBuffer(), {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+  await cache.put(request, stamped);
+}
+
+async function trimRuntimeCache(cache) {
+  const requests = await cache.keys();
+  const now = Date.now();
+  const entries = [];
+
+  for (const request of requests) {
+    const response = await cache.match(request);
+    const cachedAt = Number(response?.headers.get("X-WebVid-Cached-At") || 0);
+    if (!cachedAt || now - cachedAt > MAX_RUNTIME_AGE_MS) {
+      await cache.delete(request);
+    } else {
+      entries.push({ request, cachedAt });
+    }
+  }
+
+  entries.sort((a, b) => b.cachedAt - a.cachedAt);
+  for (const entry of entries.slice(MAX_RUNTIME_ENTRIES)) {
+    await cache.delete(entry.request);
+  }
+}
+
+async function cacheRuntimeResponse(request, response) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  await putWithTimestamp(cache, request, response);
+  await trimRuntimeCache(cache);
+}
+
+async function networkFirst(request, cacheName, fallbackUrl = null) {
+  const key = normalizedRequest(request);
+  const cache = await caches.open(cacheName);
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      if (cacheName === RUNTIME_CACHE) {
+        await cacheRuntimeResponse(key, response.clone());
+      } else {
+        await cache.put(key, response.clone());
+      }
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(key);
+    if (cached) return cached;
+    if (fallbackUrl) {
+      const fallback = await caches.match(fallbackUrl);
+      if (fallback) return fallback;
+    }
+    return new Response("Esta experiencia no está disponible sin conexión. Conéctate a internet y vuelve a intentarlo.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" }
+    });
+  }
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(SHELL_CACHE)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(key => key.startsWith("webvid-shell-") && key !== CACHE_NAME)
-        .map(key => caches.delete(key))
-    ))
-  );
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys
+      .filter(key => key.startsWith("webvid-shell-") || key.startsWith("webvid-runtime-"))
+      .filter(key => key !== SHELL_CACHE && key !== RUNTIME_CACHE)
+      .map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener("message", event => {
+  const data = event.data || {};
+
+  if (data.type === "WEBVID_PRECACHE_EXPERIENCE") {
+    event.waitUntil((async () => {
+      const urls = Array.isArray(data.urls) ? data.urls.slice(0, 200) : [];
+      const cache = await caches.open(RUNTIME_CACHE);
+      const results = [];
+
+      for (const value of urls) {
+        try {
+          const url = new URL(value, APP_SCOPE);
+          if (!isInScope(url)) {
+            results.push({ url: String(value), ok: false, reason: "outside-app-scope" });
+            continue;
+          }
+          const request = new Request(url.href, { credentials: "same-origin" });
+          const response = await fetch(request);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          await putWithTimestamp(cache, request, response);
+          results.push({ url: url.href, ok: true });
+        } catch (error) {
+          results.push({ url: String(value), ok: false, reason: error.message });
+        }
+      }
+
+      await trimRuntimeCache(cache);
+      event.ports?.[0]?.postMessage({
+        type: "WEBVID_PRECACHE_RESULT",
+        ok: results.every(item => item.ok),
+        results
+      });
+    })());
+  }
+
+  if (data.type === "WEBVID_CLEAR_RUNTIME_CACHE") {
+    event.waitUntil(caches.delete(RUNTIME_CACHE));
+  }
 });
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  const isAppDocument = request.mode === "navigate" ||
-    url.pathname.endsWith("/index.html") ||
-    url.pathname.endsWith("/experiencias.json");
+  if (!isInScope(url)) return;
 
-  if (isAppDocument) {
-    event.respondWith(
-      fetch(request).then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
-      }).catch(() => caches.match(request).then(cached => cached || caches.match("/webvid/")))
-    );
+  const isNavigation = request.mode === "navigate";
+  const isCatalog = url.pathname === `${APP_ROOT}experiencias.json`;
+  const isShellDocument = url.pathname === APP_ROOT || url.pathname === `${APP_ROOT}index.html`;
+
+  if (isNavigation || isCatalog || isShellDocument) {
+    const cacheName = isShellDocument || isCatalog ? SHELL_CACHE : RUNTIME_CACHE;
+    const fallback = isNavigation && url.pathname === APP_ROOT ? new URL("./", APP_SCOPE).href : null;
+    event.respondWith(networkFirst(request, cacheName, fallback));
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      const fresh = fetch(request).then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        }
-        return response;
+  const key = normalizedRequest(request);
+  event.respondWith((async () => {
+    const runtime = await caches.open(RUNTIME_CACHE);
+    const shell = await caches.open(SHELL_CACHE);
+    const cached = await runtime.match(key) || await shell.match(key);
+    if (cached) return cached;
+
+    try {
+      const response = await fetch(request);
+      if (response.ok) await cacheRuntimeResponse(key, response.clone());
+      return response;
+    } catch {
+      return new Response("Recurso no disponible sin conexión.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" }
       });
-      return cached || fresh;
-    })
-  );
+    }
+  })());
 });
