@@ -184,7 +184,7 @@ self.addEventListener("message", event => {
 });
 
 function parseByteRange(value, size) {
-  const match = /^bytes=(\\d*)-(\\d*)$/.exec(value || "");
+  const match = /^bytes=([0-9]*)-([0-9]*)$/.exec(value || "");
   if (!match || (!match[1] && !match[2]) || size <= 0) return null;
   let start;
   let end;
