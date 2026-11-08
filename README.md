@@ -6,11 +6,14 @@ WebVid es una plataforma mobile-first para experiencias cinematográficas vertic
 - [Reglas permanentes del proyecto](WEBVID_RULES.md)
 - [Flujo de producción y aprobación](PRODUCTION_WORKFLOW.md)
 - [Instrucciones para asistentes de IA](.github/copilot-instructions.md)
+- [Plantilla de desglose de escenas](SCENE_BREAKDOWN_TEMPLATE.md)
+- [Instrucciones para el Proyecto ChatGPT](CHATGPT_PROJECT_INSTRUCTIONS.md)
 
 ## Modelo de producción
 Cada experiencia tiene dos entregables independientes:
 1. Una web visual 9:16 **sin texto visible, sin audio, sin subtítulos y sin controles**.
 2. Un guion TTS independiente, en español por defecto.
+3. Un documento de escenas que relaciona cada fragmento del guion con imágenes, propósito narrativo y especificaciones visuales.
 
 Ningún borrador se publica en la biblioteca antes de la aprobación explícita del usuario: **“Apruebo y publica esta experiencia”**.
 
@@ -29,6 +32,9 @@ webvid/
 │   ├── metadata.json
 │   └── assets/
 ├── guiones/<slug>.txt
+├── produccion/<slug>-escenas.md
+├── SCENE_BREAKDOWN_TEMPLATE.md
+├── CHATGPT_PROJECT_INSTRUCTIONS.md
 ├── WEBVID_RULES.md
 ├── PRODUCTION_WORKFLOW.md
 └── .github/
