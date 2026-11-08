@@ -1,6 +1,7 @@
 import { SceneEngine } from "./scene-engine.mjs";
 import { VirtualCameraEngine } from "./virtual-camera-engine.mjs";
 import { GestureController } from "./gesture-controller.mjs";
+import { TransitionEngine } from "./transition-engine.mjs";
 
 /**
  * WebVid Scene Player
@@ -72,14 +73,13 @@ export class ScenePlayer {
     root.setAttribute?.("aria-label", "Experiencia visual WebVid");
     root.setAttribute?.("aria-roledescription", "reproductor visual");
 
-    this.image = this._document.createElement("img");
-    this.image.className = "webvid-player__image";
-    this.image.alt = "";
-    this.image.draggable = false;
-    this.image.decoding = "async";
-    this.image.fetchPriority = "high";
-    this.image.setAttribute("aria-hidden", "true");
+    this.image = this._createImageLayer();
+    this._spareImage = this._createImageLayer();
+    this._spareImage.style.opacity = "0";
     root.appendChild(this.image);
+    root.appendChild(this._spareImage);
+
+    this.transitions = new TransitionEngine({ reducedMotion: this._reducedMotion });
 
     this.camera = new VirtualCameraEngine({
       reducedMotion: this._reducedMotion,
@@ -105,7 +105,10 @@ export class ScenePlayer {
 
     this._handleMotionChange = event => {
       this._reducedMotion = Boolean(event.matches);
-      if (!this._destroyed) this.camera.setReducedMotion(this._reducedMotion);
+      if (!this._destroyed) {
+        this.camera.setReducedMotion(this._reducedMotion);
+        this.transitions.setReducedMotion(this._reducedMotion);
+      }
       if (this._reducedMotion) this._stopCameraTimeline();
       else if (this.engine.currentScene) this._beginCameraTimeline(this.engine.currentScene);
     };
@@ -189,7 +192,9 @@ export class ScenePlayer {
 
     this.engine.destroy();
     this.camera.destroy();
+    this.transitions.destroy();
     this.image.remove?.();
+    this._spareImage.remove?.();
     this.root.className = this._previousRootClass;
     this.root.removeAttribute?.("aria-label");
     this.root.removeAttribute?.("aria-roledescription");
@@ -222,10 +227,33 @@ export class ScenePlayer {
     }
   }
 
-  _activateScene(scene) {
+  async _activateScene(scene) {
     const src = this._sourceFor(scene);
-    this.image.src = src;
-    this.image.alt = typeof scene.alt === "string" ? scene.alt : "";
+    const hasCurrentScene = Boolean(this.engine.currentScene);
+
+    if (!hasCurrentScene) {
+      this.image.src = src;
+      this.image.alt = typeof scene.alt === "string" ? scene.alt : "";
+    } else {
+      this._spareImage.src = src;
+      this._spareImage.alt = typeof scene.alt === "string" ? scene.alt : "";
+      const transition = scene.transition && typeof scene.transition === "object"
+        ? scene.transition
+        : {};
+      const completed = await this.transitions.play({
+        from: this.image,
+        to: this._spareImage,
+        type: transition.type || "crossfade",
+        duration: transition.duration ?? 650,
+        easing: transition.easing || "ease-in-out"
+      });
+      if (!completed || this._destroyed) return false;
+
+      const previousImage = this.image;
+      this.image = this._spareImage;
+      this._spareImage = previousImage;
+    }
+
     this.image.style.transformOrigin = "center center";
     this.image.style.willChange = this._reducedMotion ? "auto" : "transform";
 
@@ -233,6 +261,18 @@ export class ScenePlayer {
       ? scene.camera
       : { from: {}, to: {} };
     this.camera.setMotion(motion);
+    return true;
+  }
+
+  _createImageLayer() {
+    const image = this._document.createElement("img");
+    image.className = "webvid-player__image";
+    image.alt = "";
+    image.draggable = false;
+    image.decoding = "async";
+    image.fetchPriority = "high";
+    image.setAttribute("aria-hidden", "true");
+    return image;
   }
 
   _sourceFor(scene) {
