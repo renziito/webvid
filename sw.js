@@ -48,6 +48,7 @@ async function putWithTimestamp(cache, request, response) {
     headers
   });
   await cache.put(request, stamped);
+  return true;
 }
 
 async function trimRuntimeCache(cache) {
@@ -143,7 +144,8 @@ self.addEventListener("message", event => {
           const request = new Request(url.href, { credentials: "same-origin" });
           const response = await fetch(request);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          await putWithTimestamp(cache, request, response);
+          const stored = await putWithTimestamp(cache, request, response);
+          if (!stored) throw new Error("resource-not-cacheable-or-over-80mb");
           results.push({ url: url.href, ok: true });
         } catch (error) {
           results.push({ url: String(value), ok: false, reason: error.message });
