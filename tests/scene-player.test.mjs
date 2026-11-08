@@ -107,5 +107,5 @@ test("ignora navegación fuera de los límites y destruye los módulos", async (
   await player.start(1);
   assert.equal(await player.next(), false);
   player.destroy();
-  assert.throws(() => player.next(), /destruido/);
+  await assert.rejects(player.next(), /destruido/);
 });
