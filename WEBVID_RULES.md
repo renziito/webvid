@@ -19,7 +19,7 @@ La experiencia comunica mediante imágenes, composición, fotografía, ilustraci
 Se permiten atributos técnicos no visibles como alt, aria-label y metadatos HTML por accesibilidad, SEO o mantenimiento, siempre que no se rendericen como texto en pantalla.
 
 ## 3. Guion TTS independiente
-Cada experiencia produce un archivo `.txt` separado en `guiones/<slug>.txt`, además de entregarse en la conversación para copiarlo fácilmente.
+Cada experiencia produce tres entregables independientes: (1) web visual, (2) guion TTS en `guiones/<slug>.txt`, y (3) documento de desglose de escenas en `produccion/<slug>-escenas.md`. El guion se entrega también en la conversación para copiarlo fácilmente.
 
 El texto debe:
 - Estar en español salvo que el usuario solicite otro idioma.
@@ -67,16 +67,21 @@ experiencias/<slug>/
   assets/
   metadata.json
 ```
-El guion separado se mantiene en `guiones/<slug>.txt`.
+El guion separado se mantiene en `guiones/<slug>.txt`. El mapa de escenas y continuidad se mantiene en `produccion/<slug>-escenas.md` y sigue la plantilla `SCENE_BREAKDOWN_TEMPLATE.md`.
 
 El catálogo de la biblioteca está en `experiencias.json`. Solo contiene experiencias aprobadas y publicadas. Cada registro usa como mínimo `title`, `description`, `path`, `category` y opcionalmente `accent` (color hexadecimal). Los títulos y descripciones del catálogo son elementos de navegación, no texto dentro de la película.
 
-## 7. Privacidad y publicación de guiones
+## 7. Documento de escenas y mantenimiento
+Cada experiencia debe tener un documento `produccion/<slug>-escenas.md` separado del guion TTS y de la web. Debe describir escena por escena: ID estable (SC-01, SC-02…), tiempo estimado, fragmento exacto del guion que acompaña, función narrativa, por qué está ahí, intención emocional, imagen principal, rutas de assets, origen/licencia, composición, iluminación, color, movimiento, transiciones, duración, relación con la narración y criterios de aceptación.
+
+El documento permite pedir cambios precisos como “en la escena 3 cambia la imagen por…”. Los IDs de escena se mantienen estables. Registrar cambios, archivos afectados y estado. Si un cambio afecta escenas vecinas o la continuidad, señalarlo y actualizar el desglose. El documento es de producción y nunca se muestra en la experiencia web.
+
+## 8. Privacidad y publicación de guiones
 El sitio GitHub Pages debe contener solo los archivos necesarios para la PWA, el catálogo y las experiencias aprobadas. El workflow excluye `guiones/`, documentación, previews y archivos de trabajo del artefacto publicado.
 
 **Importante:** el repositorio actual es público. Aunque `guiones/` se excluya del sitio GitHub Pages, los archivos comprometidos en el repositorio siguen siendo visibles desde GitHub. No guardar información privada o confidencial allí. Si un guion debe ser privado, entregarlo fuera del repositorio o usar un repositorio privado.
 
-## 8. Estados y aprobación obligatoria
+## 9. Estados y aprobación obligatoria
 Estados:
 1. Idea.
 2. Investigación.
@@ -99,7 +104,7 @@ Antes de esa autorización:
 
 Si hay soporte para ramas, se puede trabajar en una rama temporal de preview. De lo contrario, entregar una vista previa local/adjunta o una previsualización aislada que no se despliegue en producción.
 
-## 9. Calidad antes de publicar
+## 10. Calidad antes de publicar
 Comprobar:
 - No existe texto visible dentro de la experiencia.
 - No incluye audio ni guion embebido.
@@ -112,10 +117,11 @@ Comprobar:
 - El movimiento es fluido y no bloquea la navegación.
 - Funciona al abrir directamente su URL y al entrar desde la biblioteca.
 - El guion TTS es independiente y fue entregado al usuario.
+- El documento de escenas está completo y coincide con la versión final.
 
 Solo después de validar y recibir aprobación explícita se publica.
 
-## 10. Idioma y comunicación
+## 11. Idioma y comunicación
 - Todo el contenido y la comunicación del proyecto en español por defecto.
 - Fuentes y referencias se entregan por separado del guion.
 - No inventar hechos, citas, fechas, material visual ni derechos de uso.
