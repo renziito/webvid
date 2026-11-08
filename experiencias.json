@@ -3,7 +3,7 @@
     {
       "title": "Lima bajo la lluvia",
       "description": "Una experiencia cinematográfica sobre las lluvias, los aniegos y la prevención en Lima y Callao.",
-      "path": "/webvid/experiencias/lima-bajo-la-lluvia/",
+      "path": "./experiencias/lima-bajo-la-lluvia/",
       "category": "Actualidad",
       "accent": "#a4e7f3"
     }
