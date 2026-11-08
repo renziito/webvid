@@ -62,17 +62,15 @@ test("cancela animaciones anteriores cuando comienza una transición nueva", asy
   const pending = [];
   const engine = new TransitionEngine({
     animate: () => {
-      let resolve;
+      let rejectFinished;
       const animation = {
         cancelled: false,
-        finished: new Promise(done => { resolve = done; }),
+        finished: new Promise((_resolve, reject) => { rejectFinished = reject; }),
         cancel() {
           this.cancelled = true;
           const error = new Error("cancelled");
           error.name = "AbortError";
-          // Web Animations rejects finished when cancelled.
-          this.finished = Promise.reject(error);
-          this.finished.catch(() => {});
+          rejectFinished(error);
         }
       };
       pending.push(animation);
