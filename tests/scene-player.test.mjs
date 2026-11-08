@@ -36,7 +36,7 @@ class FakeRoot {
     this.attributes = {};
     this.listeners = new Map();
   }
-  appendChild(child) { this.child = child; }
+  appendChild(child) { this.child = child; this.children = this.children || []; this.children.push(child); }
   setAttribute(key, value) { this.attributes[key] = value; }
   removeAttribute(key) { delete this.attributes[key]; }
   addEventListener(type, handler) {
@@ -111,4 +111,21 @@ test("ignora navegación fuera de los límites y destruye los módulos", async (
   assert.equal(await player.next(), false);
   player.destroy();
   await assert.rejects(player.next(), /destruido/);
+});
+
+test("utiliza dos capas visuales y cambia la capa activa tras la transición", async () => {
+  const root = new FakeRoot();
+  const player = new ScenePlayer({
+    root, scenes, gestures: false, reducedMotion: true,
+    imageFactory: () => new FakeImage()
+  });
+  await player.start();
+  const firstLayer = player.image;
+  await player.next();
+  assert.equal(root.children.length, 2);
+  assert.notEqual(player.image, firstLayer);
+  assert.equal(player.image.src, "./assets/two.webp");
+  assert.equal(player.image.style.opacity, "1");
+  assert.equal(player._spareImage.style.opacity, "0");
+  player.destroy();
 });
