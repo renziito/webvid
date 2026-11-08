@@ -242,6 +242,7 @@ export class ScenePlayer {
 
   async _activateScene(scene) {
     const src = this._sourceFor(scene);
+    await this._prepareScene(scene);
     const hasCurrentScene = Boolean(this.engine.currentScene);
 
     if (!hasCurrentScene) {
@@ -274,6 +275,7 @@ export class ScenePlayer {
       ? scene.camera
       : { from: {}, to: {} };
     this.camera.setMotion(motion);
+    this._preloaded.delete(src);
     return true;
   }
 
@@ -288,7 +290,12 @@ export class ScenePlayer {
     };
     globalThis.window.addEventListener("popstate", this._handlePopState);
     globalThis.history.pushState(
-      { ...(globalThis.history.state || {}), webvidExperience: true },
+      { ...(globalThis.history.state || {}), webvidExperienceBase: true },
+      "",
+      globalThis.location.href
+    );
+    globalThis.history.pushState(
+      { ...(globalThis.history.state || {}), webvidExperienceGuard: true },
       "",
       globalThis.location.href
     );
