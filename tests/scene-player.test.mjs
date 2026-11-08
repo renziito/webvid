@@ -22,6 +22,9 @@ class FakeImage {
   }
   get src() { return this._src; }
   setAttribute() {}
+  animate() {
+    return { finished: Promise.resolve(), cancel() {} };
+  }
   remove() { this.removed = true; }
 }
 class FakeRoot {
