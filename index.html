@@ -4,45 +4,116 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090a0f">
-  <meta name="description" content="WebVid Studio: experiencias visuales cinematográficas en formato vertical.">
+  <meta name="description" content="WebVid Studio: historias visuales cinematográficas.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>WebVid Studio</title>
   <style>
-    :root{color-scheme:dark;--bg:#090a0f;--paper:#f2eee7;--muted:#a6a09a;--gold:#c9a875}
-    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100svh;color:var(--paper);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 50% 25%,#29222a 0%,#12131a 42%,var(--bg) 78%);display:flex;align-items:center;justify-content:center;padding:28px}
-    main{width:min(100%,760px);text-align:center;padding:54px 18px}.eyebrow{font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:var(--gold)}
-    h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(64px,15vw,124px);font-weight:400;letter-spacing:-.075em;line-height:.78;margin:30px 0 28px}
-    .rule{height:1px;width:58px;background:var(--gold);margin:0 auto 28px}
-    .intro{max-width:460px;margin:auto;color:var(--muted);font-family:Georgia,serif;font-size:clamp(17px,4vw,21px);line-height:1.65}
-    .status{margin:42px auto 0;padding:18px 20px;max-width:420px;border:1px solid #ffffff18;background:#ffffff08;text-align:left}
-    .status strong{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:8px}
-    .status span{font-size:13px;color:#aaa5a0;line-height:1.6}
-    .install{display:none;margin:20px auto 0;border:1px solid #c9a87588;background:#c9a87512;color:#f4e7d0;padding:13px 18px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
-    footer{margin-top:58px;color:#625f65;font-size:9px;letter-spacing:.28em;text-transform:uppercase}
+    :root{color-scheme:dark;--bg:#090a0f;--paper:#f2eee7;--muted:#aaa4a0;--gold:#c9a875;--line:#ffffff1c}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+    body{margin:0;min-height:100svh;color:var(--paper);font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 50% 12%,#302630 0%,#17151c 32%,var(--bg) 76%);padding:0 20px env(safe-area-inset-bottom)}
+    .shell{width:min(100%,760px);margin:0 auto;padding:calc(54px + env(safe-area-inset-top)) 0 42px}
+    header{text-align:center;padding:0 8px 42px}
+    .eyebrow{font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:var(--gold)}
+    h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(62px,15vw,112px);font-weight:400;letter-spacing:-.075em;line-height:.78;margin:27px 0}
+    .rule{height:1px;width:54px;background:var(--gold);margin:0 auto 24px}
+    .intro{max-width:430px;margin:auto;color:var(--muted);font-family:Georgia,serif;font-size:clamp(16px,4vw,20px);line-height:1.6}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 2px 17px}
+    .section-head h2{font:400 26px Georgia,serif;margin:0}
+    .section-head span{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#817b7a}
+    #library{display:grid;gap:13px}
+    .experience{position:relative;display:block;min-height:172px;overflow:hidden;text-decoration:none;color:inherit;border:1px solid var(--line);background:linear-gradient(115deg,#29252a,#13141b 70%);padding:25px 24px;isolation:isolate}
+    .experience:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 90% 0%,var(--accent, #9d7951) 0%,transparent 58%);opacity:.24;transition:opacity .5s,transform .7s}
+    .experience:after{content:"";position:absolute;right:24px;bottom:22px;width:34px;height:1px;background:var(--gold);transition:width .4s}
+    .experience:active:before{opacity:.4;transform:scale(1.08)}
+    .experience:active:after{width:58px}
+    .tag{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+    .experience h3{font:400 clamp(27px,7vw,38px) Georgia,serif;margin:17px 0 8px;max-width:85%}
+    .experience p{font-size:12px;line-height:1.6;color:#b3ada8;margin:0;max-width:85%}
+    .empty{border:1px dashed #ffffff2b;padding:35px 24px;text-align:center;background:#ffffff05}
+    .empty .symbol{font:300 38px Georgia,serif;color:var(--gold);margin-bottom:14px}
+    .empty h3{font:400 23px Georgia,serif;margin:0 0 9px}
+    .empty p{font-size:12px;line-height:1.7;color:var(--muted);max-width:340px;margin:auto}
+    .bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line);color:#716c70;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+    .refresh{border:0;background:none;color:var(--gold);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:10px 0;cursor:pointer}
+    .install{display:none;margin:20px auto 0;border:1px solid #c9a87588;background:#c9a87512;color:#f4e7d0;padding:13px 18px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+    .notice{min-height:16px;margin-top:10px;text-align:center;color:#807b7d;font-size:10px}
+    footer{text-align:center;margin-top:38px;color:#625f65;font-size:9px;letter-spacing:.25em;text-transform:uppercase}
+    @media(min-width:620px){#library{grid-template-columns:repeat(2,minmax(0,1fr))}.experience{min-height:210px}}
   </style>
 </head>
 <body>
-  <main>
-    <div class="eyebrow">Un espacio para contar historias</div>
-    <h1>WebVid<br>Studio</h1>
-    <div class="rule"></div>
-    <p class="intro">Experiencias visuales diseñadas para sentirse como cine. Historias que cobran vida, escena por escena.</p>
-    <section class="status" aria-live="polite">
-      <strong>Estudio preparado</strong>
-      <span>La plataforma está instalada y lista. Las nuevas experiencias aparecerán aquí a medida que sean publicadas.</span>
+  <main class="shell">
+    <header>
+      <div class="eyebrow">Un espacio para contar historias</div>
+      <h1>WebVid<br>Studio</h1>
+      <div class="rule"></div>
+      <p class="intro">Experiencias visuales diseñadas para sentirse como cine. Elige una historia y entra en ella.</p>
+      <button class="install" id="installBtn" type="button">Instalar WebVid</button>
+    </header>
+
+    <section aria-labelledby="libraryTitle">
+      <div class="section-head">
+        <h2 id="libraryTitle">Tu biblioteca</h2>
+        <span id="count">Cargando historias</span>
+      </div>
+      <div id="library" aria-live="polite">
+        <div class="empty"><div class="symbol">✳</div><h3>Preparando tus historias</h3><p>Un momento, estamos cargando la biblioteca.</p></div>
+      </div>
+      <div class="bottom">
+        <span>WebVid · Biblioteca</span>
+        <button class="refresh" id="refreshBtn" type="button">Actualizar biblioteca ↗</button>
+      </div>
+      <div class="notice" id="notice" role="status"></div>
     </section>
-    <button class="install" id="installBtn" type="button">Instalar WebVid</button>
-    <footer>WebVid Studio · Experiencias verticales</footer>
+    <footer>Una historia. Una experiencia. Un viaje.</footer>
   </main>
   <script>
-    let installPrompt;
+    let installPrompt=null;
+    const library=document.getElementById('library');
+    const count=document.getElementById('count');
+    const notice=document.getElementById('notice');
     const installBtn=document.getElementById('installBtn');
+
+    function safeText(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+    function renderExperiences(items){
+      const valid=Array.isArray(items)?items.filter(item=>item&&typeof item.title==='string'&&typeof item.path==='string'):[];
+      count.textContent=valid.length+' '+(valid.length===1?'historia':'historias');
+      if(!valid.length){
+        library.innerHTML='<div class="empty"><div class="symbol">✳</div><h3>Tu primera historia está por llegar</h3><p>Cuando publiquemos una experiencia nueva, aparecerá automáticamente aquí. Solo tendrás que abrir WebVid y tocar su portada.</p></div>';
+        return;
+      }
+      library.innerHTML=valid.map(item=>{
+        const path=safeText(item.path);
+        const title=safeText(item.title);
+        const description=safeText(item.description||'Una experiencia visual cinematográfica.');
+        const category=safeText(item.category||'Experiencia');
+        const accent=/^#[0-9a-f]{3,8}$/i.test(item.accent||'')?item.accent:'#9d7951';
+        return '<a class="experience" href="'+path+'" style="--accent:'+accent+'"><div class="tag">'+category+'</div><h3>'+title+'</h3><p>'+description+'</p></a>';
+      }).join('');
+    }
+    async function loadLibrary(){
+      notice.textContent='Actualizando…';
+      try{
+        const response=await fetch('./experiencias.json?v='+Date.now(),{cache:'no-store'});
+        if(!response.ok)throw new Error('No se pudo leer la biblioteca');
+        const data=await response.json();
+        renderExperiences(data.experiences);
+        notice.textContent='';
+      }catch(error){
+        count.textContent='Biblioteca';
+        library.innerHTML='<div class="empty"><div class="symbol">…</div><h3>No pudimos cargar las historias</h3><p>Comprueba tu conexión y vuelve a actualizar la biblioteca.</p></div>';
+        notice.textContent='No se pudo actualizar. Inténtalo de nuevo.';
+      }
+    }
+    document.getElementById('refreshBtn').addEventListener('click',loadLibrary);
+    window.addEventListener('pageshow',loadLibrary);
     window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;installBtn.style.display='inline-block'});
     installBtn.addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.style.display='none'});
-    if('serviceWorker' in navigator && location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+    if('serviceWorker' in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   </script>
 </body>
 </html>
