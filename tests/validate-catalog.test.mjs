@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const script = fileURLToPath(new URL("../scripts/validate-catalog.mjs", import.meta.url));
 
-function fixture({ description = "Descripción", missingAsset = false } = {}) {
+function fixture({ description = "Descripción", missingAsset = false, body = "", css = "body { color: white; }", scriptSource = "console.log('demo');" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "webvid-validator-"));
   const experience = join(root, "experiencias", "demo");
   mkdirSync(join(experience, "assets"), { recursive: true });
@@ -16,10 +16,10 @@ function fixture({ description = "Descripción", missingAsset = false } = {}) {
     experiences: [{ title: "Demo", description, category: "Historia", path: "./experiencias/demo/" }]
   }));
   writeFileSync(join(experience, "index.html"),
-    '<!doctype html><html><head><link rel="stylesheet" href="styles.css"></head><body><script src="script.js"></script></body></html>');
+    '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="stylesheet" href="styles.css"></head><body>' + body + '<script src="script.js"></script></body></html>');
   writeFileSync(join(experience, "styles.css"),
-    missingAsset ? "body { background: url('assets/missing.webp'); }" : "body { color: white; }");
-  writeFileSync(join(experience, "script.js"), "console.log('demo');");
+    missingAsset ? "body { background: url('assets/missing.webp'); }" : css);
+  writeFileSync(join(experience, "script.js"), scriptSource);
   writeFileSync(join(experience, "metadata.json"), JSON.stringify({ slug: "demo", title: "Demo" }));
   return root;
 }
@@ -66,6 +66,42 @@ test("rechaza recursos locales inexistentes", () => {
     const result = run(root);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /missing\.webp/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rechaza texto visible y controles en la película", () => {
+  for (const body of ["<h1>Hola</h1>", "<button>Play</button>", "<audio src='voice.mp3'></audio>"]) {
+    const root = fixture({ body });
+    try {
+      const result = run(root);
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /texto visible|prohibidos/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+});
+
+test("permite importar el motor compartido desde engine", () => {
+  const root = fixture({ scriptSource: "import { ScenePlayer } from '../../engine/scene-player.mjs';" });
+  try {
+    mkdirSync(join(root, "engine"), { recursive: true });
+    writeFileSync(join(root, "engine", "scene-player.mjs"), "export class ScenePlayer {}");
+    const result = run(root);
+    assert.equal(result.status, 0, result.stderr);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rechaza recursos absolutos incompatibles con GitHub Pages", () => {
+  const root = fixture({ css: "body { background: url('/assets/hero.webp'); }" });
+  try {
+    const result = run(root);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /fuera de la experiencia/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

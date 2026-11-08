@@ -22,9 +22,7 @@ class FakeImage {
   }
   get src() { return this._src; }
   setAttribute() {}
-  animate() {
-    return { finished: Promise.resolve(), cancel() {} };
-  }
+  animate() { return { finished: Promise.resolve(), cancel() {} }; }
   remove() { this.removed = true; }
 }
 class FakeRoot {
@@ -35,8 +33,9 @@ class FakeRoot {
     this.classList = new FakeClassList();
     this.attributes = {};
     this.listeners = new Map();
+    this.children = [];
   }
-  appendChild(child) { this.child = child; this.children = this.children || []; this.children.push(child); }
+  appendChild(child) { this.children.push(child); }
   setAttribute(key, value) { this.attributes[key] = value; }
   removeAttribute(key) { delete this.attributes[key]; }
   addEventListener(type, handler) {
@@ -61,19 +60,18 @@ test("conecta motores, inicia escena y expone imagen visual", async () => {
   await player.start();
   assert.equal(player.currentScene.id, "SC-01");
   assert.equal(player.currentIndex, 0);
-  assert.equal(root.child.src, "./assets/one.webp");
+  assert.equal(player.image.src, "./assets/one.webp");
+  assert.equal(root.children.includes(player.image), true);
   assert.deepEqual(changes, ["SC-01"]);
   assert.equal(player.camera.pose.scale, 1.1);
+  const layers = [...root.children];
   player.destroy();
-  assert.equal(root.child.removed, true);
+  assert.equal(layers.every(layer => layer.removed), true);
 });
 
 test("next y previous cambian exactamente una escena", async () => {
   const root = new FakeRoot();
-  const player = new ScenePlayer({
-    root, scenes, gestures: false, reducedMotion: true,
-    imageFactory: () => new FakeImage()
-  });
+  const player = new ScenePlayer({ root, scenes, gestures: false, reducedMotion: true, imageFactory: () => new FakeImage() });
   await player.start();
   await player.next();
   assert.equal(player.currentScene.id, "SC-02");
@@ -93,8 +91,7 @@ test("no avanza automáticamente al completar la duración de cámara", async ()
     cancelFrame: () => {}
   });
   await player.start();
-  const firstFrame = frames[0];
-  firstFrame(3000);
+  frames[0](3000);
   assert.equal(player.currentIndex, 0);
   assert.equal(frames.length, 1);
   player.destroy();
@@ -102,10 +99,7 @@ test("no avanza automáticamente al completar la duración de cámara", async ()
 
 test("ignora navegación fuera de los límites y destruye los módulos", async () => {
   const root = new FakeRoot();
-  const player = new ScenePlayer({
-    root, scenes, gestures: false, reducedMotion: true,
-    imageFactory: () => new FakeImage()
-  });
+  const player = new ScenePlayer({ root, scenes, gestures: false, reducedMotion: true, imageFactory: () => new FakeImage() });
   assert.equal(await player.previous(), false);
   await player.start(1);
   assert.equal(await player.next(), false);
@@ -115,10 +109,7 @@ test("ignora navegación fuera de los límites y destruye los módulos", async (
 
 test("utiliza dos capas visuales y cambia la capa activa tras la transición", async () => {
   const root = new FakeRoot();
-  const player = new ScenePlayer({
-    root, scenes, gestures: false, reducedMotion: true,
-    imageFactory: () => new FakeImage()
-  });
+  const player = new ScenePlayer({ root, scenes, gestures: false, reducedMotion: true, imageFactory: () => new FakeImage() });
   await player.start();
   const firstLayer = player.image;
   await player.next();

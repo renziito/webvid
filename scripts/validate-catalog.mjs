@@ -36,7 +36,7 @@ function requireDirectory(path, label) {
 }
 
 function isExternalReference(value) {
-  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(value);
+  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(value);
 }
 
 function checkLocalReference(reference, sourceFile, experienceRoot, label) {
@@ -86,17 +86,48 @@ function checkJavaScriptReferences(source, jsFile, experienceRoot, slug) {
     /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
     /\bnew\s+URL\(\s*["']([^"']+)["']\s*,\s*import\.meta\.url\s*\)/g
   ];
-
   for (const pattern of patterns) {
     for (const match of source.matchAll(pattern)) {
       const reference = match[1];
-      if (reference.startsWith("./") || reference.startsWith("../")) {
-        checkLocalReference(reference, jsFile, experienceRoot, `${slug}/script.js`);
+      if (!reference.startsWith("./") && !reference.startsWith("../")) continue;
+      let decoded;
+      try { decoded = decodeURIComponent(reference.split(/[?#]/, 1)[0]); }
+      catch { fail(slug + "/script.js: import local mal codificado " + reference + "."); }
+      const target = resolve(dirname(jsFile), decoded);
+      if (target !== root && !target.startsWith(root + sep)) {
+        fail(slug + "/script.js: import fuera del repositorio " + reference + ".");
       }
+      if (!existsSync(target)) fail(slug + "/script.js: módulo local no encontrado " + reference + ".");
     }
   }
 }
 
+function checkExperiencePresentation(html, css, js, slug) {
+  if (!/<meta\b(?=[^>]*name=["']viewport["'])(?=[^>]*content=["'][^"']*viewport-fit=cover)[^>]*>/i.test(html)) {
+    fail(slug + "/index.html debe incluir viewport móvil con viewport-fit=cover.");
+  }
+  if (/<\s*(?:audio|button|input|textarea|select|track)\b/i.test(html)) {
+    fail(slug + "/index.html contiene audio, controles o elementos de interfaz prohibidos.");
+  }
+  const body = (html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i) || [null, ""])[1];
+  const visibleMarkup = body
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(?:nbsp|#160);/gi, " ")
+    .trim();
+  if (visibleMarkup) fail(slug + "/index.html contiene texto visible fuera de la narración visual.");
+  if (/<audio\b|speechSynthesis|AudioContext|HTMLAudioElement/i.test(html + js)) {
+    fail(slug + "/index.html contiene referencias de audio no permitidas.");
+  }
+  if (/\b(?:speechSynthesis|AudioContext|HTMLAudioElement|new\s+Audio\s*\()/i.test(js)) {
+    fail(slug + "/script.js contiene APIs de audio no permitidas.");
+  }
+  if (!/100dvh|100svh|aspect-ratio\s*:\s*9\s*\/\s*16/i.test(css)) {
+    console.warn("[WebVid] AVISO: " + slug + " no declara explícitamente un viewport vertical 9:16.");
+  }
+}
 if (!existsSync(catalogFile)) fail("No existe experiencias.json.");
 requireDirectory(experiencesRoot, "El directorio experiencias/");
 
@@ -165,6 +196,7 @@ for (const [index, item] of catalog.experiences.entries()) {
     fail(`${slug}/index.html no parece un documento HTML completo.`);
   }
 
+  checkExperiencePresentation(html, css, js, slug);
   checkHtmlReferences(html, htmlFile, directory, slug);
   checkCssReferences(css, cssFile, directory, slug);
   checkJavaScriptReferences(js, jsFile, directory, slug);

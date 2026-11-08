@@ -59,6 +59,8 @@ export class ScenePlayer {
     this._activeDuration = 1;
     this._preloaded = new Map();
     this._unsubscribe = [];
+    this._backNavigationInstalled = false;
+    this._handlePopState = null;
     this._previousRootClass = root.className || "";
 
     const mediaQuery = typeof reducedMotion === "boolean"
@@ -143,6 +145,7 @@ export class ScenePlayer {
 
   async start(index = 0) {
     this._assertAlive();
+    this._installBackNavigation();
     return this.engine.start(index);
   }
 
@@ -180,6 +183,9 @@ export class ScenePlayer {
     if (this._destroyed) return;
     this._destroyed = true;
     this._stopCameraTimeline();
+    if (this._handlePopState && globalThis.window?.removeEventListener) {
+      globalThis.window.removeEventListener("popstate", this._handlePopState);
+    }
     this.gestures?.destroy();
     for (const unsubscribe of this._unsubscribe) unsubscribe();
     this._unsubscribe = [];
@@ -212,7 +218,14 @@ export class ScenePlayer {
         resolve(preload);
         return;
       }
-      preload.onload = () => resolve(preload);
+      preload.onload = async () => {
+        try {
+          if (typeof preload.decode === "function") await preload.decode();
+          resolve(preload);
+        } catch (error) {
+          reject(error);
+        }
+      };
       preload.onerror = () => reject(new Error("No se pudo cargar el recurso visual: " + src));
       preload.src = src;
     });
@@ -229,6 +242,7 @@ export class ScenePlayer {
 
   async _activateScene(scene) {
     const src = this._sourceFor(scene);
+    await this._prepareScene(scene);
     const hasCurrentScene = Boolean(this.engine.currentScene);
 
     if (!hasCurrentScene) {
@@ -261,7 +275,31 @@ export class ScenePlayer {
       ? scene.camera
       : { from: {}, to: {} };
     this.camera.setMotion(motion);
+    this._preloaded.delete(src);
     return true;
+  }
+
+  _installBackNavigation() {
+    if (this._backNavigationInstalled || !globalThis.history?.pushState ||
+        !globalThis.location || !globalThis.window?.addEventListener) return;
+    const libraryUrl = new URL("../", import.meta.url);
+    this._handlePopState = () => {
+      if (globalThis.location.pathname !== libraryUrl.pathname) {
+        globalThis.location.replace(libraryUrl.href);
+      }
+    };
+    globalThis.window.addEventListener("popstate", this._handlePopState);
+    globalThis.history.pushState(
+      { ...(globalThis.history.state || {}), webvidExperienceBase: true },
+      "",
+      globalThis.location.href
+    );
+    globalThis.history.pushState(
+      { ...(globalThis.history.state || {}), webvidExperienceGuard: true },
+      "",
+      globalThis.location.href
+    );
+    this._backNavigationInstalled = true;
   }
 
   _createImageLayer() {
