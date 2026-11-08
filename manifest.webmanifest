@@ -11,12 +11,19 @@
   "orientation": "portrait",
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
+  "categories": ["entertainment", "video"],
   "icons": [
     {
       "src": "/webvid/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/webvid/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
