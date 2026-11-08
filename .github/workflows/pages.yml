@@ -35,6 +35,7 @@ jobs:
           node --check scripts/validate-catalog.mjs
           node --check engine/scene-engine.mjs
           node --check engine/virtual-camera-engine.mjs
+          node --check engine/gesture-controller.mjs
 
       - name: Run automated tests
         run: node --test tests/*.test.mjs
@@ -48,14 +49,14 @@ jobs:
       - name: Assemble public site
         run: |
           set -euo pipefail
-          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs; do
+          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs; do
             test -f "$file"
           done
 
           rm -rf dist
           mkdir -p dist/experiencias dist/engine
           cp index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json dist/
-          cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs dist/engine/
+          cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs dist/engine/
 
           if [ -d experiencias ]; then
             cp -R experiencias/. dist/experiencias/
