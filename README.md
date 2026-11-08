@@ -36,6 +36,7 @@ webvid/
 │   ├── gesture-controller.test.mjs
 │   ├── scene-player.test.mjs
 │   ├── transition-engine.test.mjs
+│   ├── service-worker.test.mjs
 │   └── validate-catalog.test.mjs
 ├── experiencias.json
 ├── index.html
@@ -63,7 +64,7 @@ El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante P
 
 ## Scene Player
 
-`engine/scene-player.mjs` integra los tres motores. Recibe un elemento raíz y una lista de escenas, crea una única imagen visual, precarga el recurso siguiente, conecta los swipes con la navegación y sincroniza el movimiento de cámara con la duración de la escena. El movimiento termina al completar su duración, pero la escena permanece activa hasta otro swipe o una llamada explícita a `next()`, `previous()` o `goTo()`.
+`engine/scene-player.mjs` integra los tres motores. Recibe un elemento raíz y una lista de escenas, crea dos capas visuales, decodifica y precarga el recurso siguiente, conecta los swipes con la navegación y sincroniza el movimiento de cámara con la duración de la escena. El movimiento termina al completar su duración, pero la escena permanece activa hasta otro swipe o una llamada explícita a `next()`, `previous()` o `goTo()`.
 
 Cada escena requiere un `id` estable y una ruta `src` (o `image.src`). Puede incluir `alt`, `duration` en segundos y `camera` con `from`, `to` y `easing`. La opción `gestures: false` desactiva los swipes. La preferencia `prefers-reduced-motion` se respeta automáticamente o puede fijarse con `reducedMotion`.
 
@@ -76,14 +77,14 @@ Para montar el reproductor en una experiencia, importa `ScenePlayer` desde `../.
 ## PWA y funcionamiento offline
 
 - La biblioteca y el app shell se guardan en caché para abrir WebVid sin conexión después de una primera visita correcta.
-- Las páginas y recursos de experiencias visitadas se guardan en una caché runtime con límite de 120 recursos, antigüedad máxima de 30 días y un límite declarado de 80 MB por recurso. Los vídeos precargados completos admiten solicitudes HTTP Range desde la copia local.
+- Las páginas y recursos de experiencias visitadas se guardan en una caché runtime con límite de 120 recursos, antigüedad máxima de 30 días y un límite declarado de 80 MB por recurso. Los vídeos precargados completos admiten solicitudes HTTP Range desde la copia local mediante respuestas 206, incluidos rangos abiertos y suffix. Los recursos sin Content-Length también se limitan por lectura real del cuerpo, con un máximo de 80 MB.
 - El Service Worker elimina versiones antiguas de sus cachés al activarse.
 - El futuro reproductor puede solicitar la precarga de recursos de una experiencia mediante el mensaje `WEBVID_PRECACHE_EXPERIENCE`, enviando una lista de URLs locales dentro del ámbito `/webvid/`.
 - Una experiencia que nunca se haya visitado ni precargado no puede garantizarse disponible offline.
 
 ## Validación y despliegue
 
-Cada push a `main` ejecuta GitHub Actions. El workflow comprueba la sintaxis JavaScript, ejecuta pruebas automáticas, valida campos y estructura del catálogo, comprueba referencias locales en HTML/CSS/JavaScript y ensambla el sitio en `dist/`. Si una comprobación falla, el despliegue se detiene.
+Cada push a `main` y a ramas `fix/**` ejecuta las pruebas y la validación. Solo los pushes a `main` pueden desplegar GitHub Pages; las ramas de reparación nunca publican previews. El workflow comprueba la sintaxis JavaScript, ejecuta pruebas automáticas, valida campos y estructura del catálogo, comprueba referencias locales en HTML/CSS/JavaScript y ensambla el sitio en `dist/`. Si una comprobación falla, el despliegue se detiene.
 
 Node.js se utiliza únicamente en GitHub Actions para validar y probar el código. La experiencia publicada se ejecuta en el navegador con HTML, CSS y JavaScript nativo; no necesita un servidor Node.js.
 
@@ -95,7 +96,7 @@ Los guiones y documentos de producción no deben guardarse en este repositorio p
 
 Para probar la PWA debe servirse desde un origen HTTP(S); abrir `index.html` directamente como archivo no habilita Service Workers.
 
-El workflow valida el catálogo y los motores. Las pruebas de instalación real, caché offline, gestos y rendimiento móvil deben completarse en un navegador Android, idealmente en Samsung S25.
+El workflow valida sintaxis, motores, transiciones, Service Worker, rangos HTTP y catálogo. Las pruebas de instalación real, caché offline, gestos físicos y rendimiento móvil deben completarse en un navegador Android, idealmente en Samsung S25. Las pruebas automatizadas no sustituyen esa validación física.
 
 ## Sitio
 
