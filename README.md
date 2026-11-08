@@ -37,7 +37,7 @@ Cada experiencia publicada debe tener `index.html` y `metadata.json`. El catálo
 ## PWA y funcionamiento offline
 
 - La biblioteca y el app shell se guardan en caché para abrir WebVid sin conexión después de una primera visita correcta.
-- Las páginas y recursos de experiencias visitadas se guardan en una caché runtime con límite de 120 recursos y antigüedad máxima de 30 días.
+- Las páginas y recursos de experiencias visitadas se guardan en una caché runtime con límite de 120 recursos, antigüedad máxima de 30 días y un límite de 80 MB por recurso. Los vídeos precargados completos admiten solicitudes HTTP Range desde la copia local.
 - El Service Worker elimina versiones antiguas de sus cachés al activarse.
 - El futuro reproductor puede solicitar la precarga de recursos de una experiencia mediante el mensaje `WEBVID_PRECACHE_EXPERIENCE`, enviando una lista de URLs locales dentro del ámbito `/webvid/`.
 - Una experiencia que nunca se haya visitado ni precargado no puede garantizarse disponible offline.
