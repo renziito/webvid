@@ -6,6 +6,13 @@
       "path": "./experiencias/lima-bajo-la-lluvia/",
       "category": "Actualidad",
       "accent": "#a4e7f3"
+    },
+    {
+      "title": "Inside the Algorithm",
+      "description": "Un viaje cinematográfico por las señales de atención y las recomendaciones de YouTube Shorts.",
+      "path": "./experiencias/inside-the-algorithm/",
+      "category": "Tecnología",
+      "accent": "#ff315f"
     }
   ]
 }
