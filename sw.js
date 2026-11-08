@@ -172,7 +172,7 @@ async function handleRangeRequest(request) {
 
   if (cached) {
     const range = request.headers.get("Range") || "";
-    const match = /^bytes=(\\d*)-(\\d*)$/.exec(range);
+    const match = /^bytes=(\d*)-(\d*)$/.exec(range);
     if (!match) return new Response(null, { status: 416 });
 
     const buffer = await cached.arrayBuffer();
