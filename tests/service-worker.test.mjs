@@ -6,9 +6,10 @@ import { fileURLToPath } from "node:url";
 
 function createWorker({ cachedResponse = null, networkResponse = null } = {}) {
   const handlers = new Map();
+  let cacheWrites = 0;
   const cache = {
     match: async () => cachedResponse?.clone() ?? undefined,
-    put: async () => {},
+    put: async () => { cacheWrites++; },
     keys: async () => [],
     delete: async () => true,
     addAll: async () => {}
@@ -36,6 +37,7 @@ function createWorker({ cachedResponse = null, networkResponse = null } = {}) {
     URL, Request, Response, Headers, Blob, Date, Number, String, Math, Promise
   });
   return {
+    get cacheWrites() { return cacheWrites; },
     async dispatchRange(range) {
       let responsePromise;
       const request = new Request("https://example.test/webvid/experiencias/demo/assets/film.mp4", {
@@ -86,4 +88,31 @@ test("reenvía al servidor los rangos no almacenados", async () => {
   const response = await worker.dispatchRange("bytes=0-1");
   assert.equal(response.status, 206);
   assert.equal(response.headers.get("Content-Range"), "bytes 0-1/10");
+});
+
+test("no almacena recursos cuyo Content-Length supera el límite", async () => {
+  const worker = createWorker({
+    networkResponse: new Response(new Uint8Array([1,2,3]), {
+      headers: { "Content-Length": String(80 * 1024 * 1024 + 1) }
+    })
+  });
+  let responsePromise;
+  const request = new Request("https://example.test/webvid/experiencias/demo/assets/oversized.webp");
+  const handlers = new Map();
+  const source = readFileSync(fileURLToPath(new URL("../sw.js", import.meta.url)), "utf8");
+  const cache = {
+    match: async () => undefined,
+    put: async () => { worker._writes = (worker._writes || 0) + 1; },
+    keys: async () => []
+  };
+  const cachesMock = { open: async () => cache, keys: async () => [], delete: async () => true, match: async () => undefined };
+  const self = { registration: { scope: "https://example.test/webvid/" }, addEventListener: (name, handler) => handlers.set(name, handler), skipWaiting: async () => {}, clients: { claim: async () => {} } };
+  runInNewContext(source, {
+    self, caches: cachesMock, fetch: async () => new Response(new Uint8Array([1,2,3]), { headers: { "Content-Length": String(80 * 1024 * 1024 + 1) } }),
+    URL, Request, Response, Headers, Blob, Date, Number, String, Math, Promise
+  });
+  handlers.get("fetch")({ request, respondWith: promise => { responsePromise = promise; } });
+  const response = await responsePromise;
+  assert.equal(response.status, 200);
+  assert.equal(worker._writes || 0, 0);
 });
