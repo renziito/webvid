@@ -73,3 +73,27 @@ test("no permite usar el motor después de destruirlo", async () => {
   engine.destroy();
   await assert.rejects(engine.start(), /destruido/);
 });
+
+test("una activación cancelada no cambia la escena activa ni emite scenechange", async () => {
+  let cancel = false;
+  const engine = new SceneEngine({
+    scenes,
+    activateScene: async () => cancel ? false : true
+  });
+  const changes = [];
+  engine.on("scenechange", event => changes.push(event.scene.id));
+  await engine.start(0);
+  cancel = true;
+  assert.equal(await engine.next(), false);
+  assert.equal(engine.currentIndex, 0);
+  assert.equal(engine.currentScene.id, "SC-01");
+  assert.equal(engine.getSnapshot().status, "ready");
+  assert.deepEqual(changes, ["SC-01"]);
+});
+
+test("una activación inicial cancelada mantiene el motor en idle", async () => {
+  const engine = new SceneEngine({ scenes, activateScene: async () => false });
+  assert.equal(await engine.start(), false);
+  assert.equal(engine.currentIndex, -1);
+  assert.equal(engine.getSnapshot().status, "idle");
+});
