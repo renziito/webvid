@@ -71,16 +71,38 @@ test("rechaza recursos locales inexistentes", () => {
   }
 });
 
-test("rechaza texto visible y controles en la película", () => {
-  for (const body of ["<h1>Hola</h1>", "<button>Play</button>", "<audio src='voice.mp3'></audio>"]) {
+test("permite texto visible como aviso no bloqueante", () => {
+  const root = fixture({ body: "<h1>Free as a Bird</h1><p>Una historia visual.</p>" });
+  try {
+    const result = run(root);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stderr, /texto visible/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("sigue rechazando controles y audio embebido", () => {
+  for (const body of ["<button>Play</button>", "<audio src='voice.mp3'></audio>"]) {
     const root = fixture({ body });
     try {
       const result = run(root);
       assert.notEqual(result.status, 0);
-      assert.match(result.stderr, /texto visible|prohibidos/);
+      assert.match(result.stderr, /prohibidos/);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  }
+});
+
+test("sigue rechazando APIs de audio en JavaScript", () => {
+  const root = fixture({ scriptSource: "const audio = new Audio('voice.mp3');" });
+  try {
+    const result = run(root);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /audio/i);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });
 
