@@ -23,18 +23,46 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate experience catalog
+        run: node scripts/validate-catalog.mjs
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Assemble public site (exclude scripts and project documentation)
+
+      - name: Assemble public site
         run: |
-          mkdir -p dist
-          cp index.html manifest.webmanifest sw.js icon.svg experiencias.json dist/
-          cp -R experiencias dist/experiencias
+          set -euo pipefail
+          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json; do
+            test -f "$file"
+          done
+
+          rm -rf dist
+          mkdir -p dist/experiencias
+          cp index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json dist/
+
+          if [ -d experiencias ]; then
+            cp -R experiencias/. dist/experiencias/
+          fi
+
+          rm -f dist/experiencias/.gitkeep
           touch dist/.nojekyll
+
+          if find dist -type f \\( -name "*.md" -o -name "*.txt" \\) | grep -q .; then
+            echo "Unexpected documentation or text files in public artifact."
+            exit 1
+          fi
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./dist"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
