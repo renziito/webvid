@@ -62,7 +62,7 @@ jobs:
           rm -f dist/experiencias/.gitkeep
           touch dist/.nojekyll
 
-          if find dist -type f \\( -name "*.md" -o -name "*.txt" -o -name "*.pdf" -o -name "*.doc" -o -name "*.docx" \\) | grep -q .; then
+          if find dist -type f \( -name "*.md" -o -name "*.txt" -o -name "*.pdf" -o -name "*.doc" -o -name "*.docx" \) | grep -q .; then
             echo "Unexpected documentation file in public artifact."
             exit 1
           fi
