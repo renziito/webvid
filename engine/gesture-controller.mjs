@@ -74,14 +74,16 @@ export class GestureController {
   }
 
   _onPointerDown(event) {
-    if (this._destroyed || event.isPrimary === false ||
+    if (this._destroyed ||
         (event.pointerType === "mouse" && event.button !== 0)) return;
 
-    this._activePointers.add(event.pointerId);
-    if (this._activePointers.size > 1) {
+    if (this._activePointers.size > 0) {
+      this._activePointers.add(event.pointerId);
       this._gesture = null;
       return;
     }
+    if (event.isPrimary === false) return;
+    this._activePointers.add(event.pointerId);
 
     this._gesture = {
       pointerId: event.pointerId,
