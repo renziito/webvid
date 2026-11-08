@@ -25,10 +25,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Assemble public site (exclude scripts and project documentation)
+        run: |
+          mkdir -p dist
+          cp index.html manifest.webmanifest sw.js icon.svg experiencias.json dist/
+          cp -R experiencias dist/experiencias
+          touch dist/.nojekyll
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "./dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
