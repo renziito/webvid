@@ -18,7 +18,9 @@ webvid/
 ├── engine/
 │   ├── scene-engine.mjs
 │   ├── virtual-camera-engine.mjs
-│   └── gesture-controller.mjs
+│   ├── gesture-controller.mjs
+│   ├── scene-player.mjs
+│   └── scene-player.css
 ├── experiencias/
 │   └── <slug>/
 │       ├── index.html
@@ -32,6 +34,7 @@ webvid/
 │   ├── scene-engine.test.mjs
 │   ├── virtual-camera-engine.test.mjs
 │   ├── gesture-controller.test.mjs
+│   ├── scene-player.test.mjs
 │   └── validate-catalog.test.mjs
 ├── experiencias.json
 ├── index.html
@@ -54,6 +57,14 @@ El módulo `engine/virtual-camera-engine.mjs` calcula el encuadre de una escena 
 Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final. ## Gesture Controller
 
 El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante Pointer Events: swipe hacia arriba solicita avanzar una escena y swipe hacia abajo solicita retroceder una. Un gesto válido produce una sola acción; movimientos cortos, horizontales, secundarios o multitáctiles se ignoran. El controlador no avanza automáticamente ni muestra controles. Al conectarlo, debe montarse únicamente sobre el contenedor del reproductor; mientras está activo aplica `touch-action: none` a ese contenedor y restaura el valor anterior al destruirse. El reproductor conserva la responsabilidad de llamar a `SceneEngine.next()` o `SceneEngine.previous()`.
+
+## Scene Player
+
+`engine/scene-player.mjs` integra los tres motores. Recibe un elemento raíz y una lista de escenas, crea una única imagen visual, precarga el recurso siguiente, conecta los swipes con la navegación y sincroniza el movimiento de cámara con la duración de la escena. El movimiento termina al completar su duración, pero la escena permanece activa hasta otro swipe o una llamada explícita a `next()`, `previous()` o `goTo()`.
+
+Cada escena requiere un `id` estable y una ruta `src` (o `image.src`). Puede incluir `alt`, `duration` en segundos y `camera` con `from`, `to` y `easing`. La opción `gestures: false` desactiva los swipes. La preferencia `prefers-reduced-motion` se respeta automáticamente o puede fijarse con `reducedMotion`.
+
+Para montar el reproductor en una experiencia, importa `ScenePlayer` desde `../../engine/scene-player.mjs`, carga `../../engine/scene-player.css` y proporciona un contenedor vacío de pantalla completa. El módulo no añade texto, botones, indicadores ni audio.
 
 ## PWA y funcionamiento offline
 
