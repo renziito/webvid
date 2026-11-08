@@ -1,4 +1,4 @@
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL_CACHE = `webvid-shell-${VERSION}`;
 const RUNTIME_CACHE = `webvid-runtime-${VERSION}`;
 const MAX_RUNTIME_ENTRIES = 120;
@@ -36,18 +36,49 @@ function normalizedRequest(request) {
   });
 }
 
-async function putWithTimestamp(cache, request, response) {
-  if (!response || response.status !== 200 || response.type === "opaque") return false;
-  const contentLength = Number(response.headers.get("Content-Length") || 0);
-  if (contentLength > MAX_CACHEABLE_RESOURCE_BYTES) return false;
+async function boundedCacheResponse(response) {
+  if (!response || response.status !== 200 || response.type === "opaque") return null;
+  const declaredLength = Number(response.headers.get("Content-Length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_CACHEABLE_RESOURCE_BYTES) return null;
+  if (!response.body) return new Response(null, { status: response.status, headers: response.headers });
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_CACHEABLE_RESOURCE_BYTES) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    try { await reader.cancel(); } catch {}
+    throw error;
+  }
   const headers = new Headers(response.headers);
-  headers.set("X-WebVid-Cached-At", String(Date.now()));
-  const stamped = new Response(response.clone().body, {
+  headers.set("Content-Length", String(size));
+  return new Response(new Blob(chunks), {
     status: response.status,
     statusText: response.statusText,
     headers
   });
-  await cache.put(request, stamped);
+}
+
+async function putWithTimestamp(cache, request, response) {
+  const bounded = await boundedCacheResponse(response.clone());
+  if (!bounded) return false;
+  const headers = new Headers(bounded.headers);
+  headers.set("X-WebVid-Cached-At", String(Date.now()));
+  await cache.put(request, new Response(bounded.body, {
+    status: bounded.status,
+    statusText: bounded.statusText,
+    headers
+  }));
   return true;
 }
 
@@ -55,7 +86,6 @@ async function trimRuntimeCache(cache) {
   const requests = await cache.keys();
   const now = Date.now();
   const entries = [];
-
   for (const request of requests) {
     const response = await cache.match(request);
     const cachedAt = Number(response?.headers.get("X-WebVid-Cached-At") || 0);
@@ -65,11 +95,8 @@ async function trimRuntimeCache(cache) {
       entries.push({ request, cachedAt });
     }
   }
-
   entries.sort((a, b) => b.cachedAt - a.cachedAt);
-  for (const entry of entries.slice(MAX_RUNTIME_ENTRIES)) {
-    await cache.delete(entry.request);
-  }
+  for (const entry of entries.slice(MAX_RUNTIME_ENTRIES)) await cache.delete(entry.request);
 }
 
 async function cacheRuntimeResponse(request, response) {
@@ -81,15 +108,11 @@ async function cacheRuntimeResponse(request, response) {
 async function networkFirst(request, cacheName, fallbackUrl = null) {
   const key = normalizedRequest(request);
   const cache = await caches.open(cacheName);
-
   try {
     const response = await fetch(request);
     if (response.ok) {
-      if (cacheName === RUNTIME_CACHE) {
-        await cacheRuntimeResponse(key, response.clone());
-      } else {
-        await cache.put(key, response.clone());
-      }
+      if (cacheName === RUNTIME_CACHE) await cacheRuntimeResponse(key, response.clone());
+      else await cache.put(key, response.clone());
     }
     return response;
   } catch {
@@ -107,11 +130,9 @@ async function networkFirst(request, cacheName, fallbackUrl = null) {
 }
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(SHELL_CACHE)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(SHELL_CACHE)
+    .then(cache => cache.addAll(APP_SHELL))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", event => {
@@ -127,13 +148,11 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("message", event => {
   const data = event.data || {};
-
   if (data.type === "WEBVID_PRECACHE_EXPERIENCE") {
     event.waitUntil((async () => {
       const urls = Array.isArray(data.urls) ? data.urls.slice(0, 200) : [];
       const cache = await caches.open(RUNTIME_CACHE);
       const results = [];
-
       for (const value of urls) {
         try {
           const url = new URL(value, APP_SCOPE);
@@ -151,7 +170,6 @@ self.addEventListener("message", event => {
           results.push({ url: String(value), ok: false, reason: error.message });
         }
       }
-
       await trimRuntimeCache(cache);
       event.ports?.[0]?.postMessage({
         type: "WEBVID_PRECACHE_RESULT",
@@ -160,75 +178,80 @@ self.addEventListener("message", event => {
       });
     })());
   }
-
   if (data.type === "WEBVID_CLEAR_RUNTIME_CACHE") {
     event.waitUntil(caches.delete(RUNTIME_CACHE));
   }
 });
+
+function parseByteRange(value, size) {
+  const match = /^bytes=(\\d*)-(\\d*)$/.exec(value || "");
+  if (!match || (!match[1] && !match[2]) || size <= 0) return null;
+  let start;
+  let end;
+  if (!match[1]) {
+    const suffix = Number(match[2]);
+    if (!Number.isSafeInteger(suffix) || suffix <= 0) return null;
+    start = Math.max(0, size - suffix);
+    end = size - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] ? Number(match[2]) : size - 1;
+  }
+  if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+      start < 0 || start >= size || end < start) return null;
+  return { start, end: Math.min(end, size - 1) };
+}
 
 async function handleRangeRequest(request) {
   const url = new URL(request.url);
   const fullRequest = new Request(url.href, { credentials: "same-origin" });
   const runtime = await caches.open(RUNTIME_CACHE);
   const cached = await runtime.match(fullRequest);
-
-  if (cached) {
-    const range = request.headers.get("Range") || "";
-    const match = /^bytes=(\d*)-(\d*)$/.exec(range);
-    if (!match) return new Response(null, { status: 416 });
-
-    const buffer = await cached.arrayBuffer();
-    const size = buffer.byteLength;
-    let start = match[1] ? Number(match[1]) : 0;
-    let end = match[2] ? Number(match[2]) : size - 1;
-
-    if (!match[1] && match[2]) {
-      const suffixLength = Number(match[2]);
-      start = Math.max(0, size - suffixLength);
-      end = size - 1;
-    }
-
-    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
-        start < 0 || start >= size || end < start) {
-      return new Response(null, {
-        status: 416,
-        headers: { "Content-Range": `bytes */${size}` }
+  if (!cached) {
+    try { return await fetch(request); }
+    catch {
+      return new Response("Vídeo no disponible sin conexión. Descarga la experiencia mientras tengas conexión.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" }
       });
     }
-
-    end = Math.min(end, size - 1);
-    const headers = new Headers(cached.headers);
-    headers.set("Accept-Ranges", "bytes");
-    headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
-    headers.set("Content-Length", String(end - start + 1));
-    return new Response(buffer.slice(start, end + 1), {
-      status: 206,
-      statusText: "Partial Content",
-      headers
-    });
   }
 
-  try {
-    return await fetch(request);
-  } catch {
-    return new Response("Vídeo no disponible sin conexión. Descarga la experiencia mientras tengas conexión.", {
-      status: 503,
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" }
+  const buffer = await cached.arrayBuffer();
+  const size = buffer.byteLength;
+  const range = parseByteRange(request.headers.get("Range"), size);
+  if (!range) {
+    return new Response(null, {
+      status: 416,
+      headers: { "Content-Range": `bytes */${size}`, "Accept-Ranges": "bytes" }
     });
   }
+  const { start, end } = range;
+  const headers = new Headers(cached.headers);
+  headers.set("Accept-Ranges", "bytes");
+  headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
+  headers.set("Content-Length", String(end - start + 1));
+  return new Response(buffer.slice(start, end + 1), {
+    status: 206,
+    statusText: "Partial Content",
+    headers
+  });
 }
 
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
   if (!isInScope(url)) return;
+
+  if (request.headers.has("Range")) {
+    event.respondWith(handleRangeRequest(request));
+    return;
+  }
 
   const isNavigation = request.mode === "navigate";
   const isCatalog = url.pathname === `${APP_ROOT}experiencias.json`;
   const isShellDocument = url.pathname === APP_ROOT || url.pathname === `${APP_ROOT}index.html`;
-
   if (isNavigation || isCatalog || isShellDocument) {
     const cacheName = isShellDocument || isCatalog ? SHELL_CACHE : RUNTIME_CACHE;
     const fallback = isNavigation && url.pathname === APP_ROOT ? new URL("./", APP_SCOPE).href : null;
@@ -242,7 +265,6 @@ self.addEventListener("fetch", event => {
     const shell = await caches.open(SHELL_CACHE);
     const cached = await runtime.match(key) || await shell.match(key);
     if (cached) return cached;
-
     try {
       const response = await fetch(request);
       if (response.ok) await cacheRuntimeResponse(key, response.clone());
