@@ -35,6 +35,7 @@ webvid/
 │   ├── virtual-camera-engine.test.mjs
 │   ├── gesture-controller.test.mjs
 │   ├── scene-player.test.mjs
+│   ├── transition-engine.test.mjs
 │   └── validate-catalog.test.mjs
 ├── experiencias.json
 ├── index.html
@@ -54,7 +55,9 @@ El módulo `engine/scene-engine.mjs` administra la secuencia de escenas, su prep
 
 El módulo `engine/virtual-camera-engine.mjs` calcula el encuadre de una escena mediante keyframes de posición, escala y rotación. Recibe un progreso normalizado entre 0 y 1 y devuelve un transform CSS. No administra el tiempo ni crea animaciones autónomas: el reproductor controlará el progreso para mantener sincronizados cámara y duración de escena.
 
-Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final. ## Gesture Controller
+Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final.
+
+## Gesture Controller
 
 El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante Pointer Events: swipe hacia arriba solicita avanzar una escena y swipe hacia abajo solicita retroceder una. Un gesto válido produce una sola acción; movimientos cortos, horizontales, secundarios o multitáctiles se ignoran. El controlador no avanza automáticamente ni muestra controles. Al conectarlo, debe montarse únicamente sobre el contenedor del reproductor; mientras está activo aplica `touch-action: none` a ese contenedor y restaura el valor anterior al destruirse. El reproductor conserva la responsabilidad de llamar a `SceneEngine.next()` o `SceneEngine.previous()`.
 
@@ -65,6 +68,10 @@ El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante P
 Cada escena requiere un `id` estable y una ruta `src` (o `image.src`). Puede incluir `alt`, `duration` en segundos y `camera` con `from`, `to` y `easing`. La opción `gestures: false` desactiva los swipes. La preferencia `prefers-reduced-motion` se respeta automáticamente o puede fijarse con `reducedMotion`.
 
 Para montar el reproductor en una experiencia, importa `ScenePlayer` desde `../../engine/scene-player.mjs`, carga `../../engine/scene-player.css` y proporciona un contenedor vacío de pantalla completa. El módulo no añade texto, botones, indicadores ni audio.
+
+## Transition Engine
+
+`engine/transition-engine.mjs` anima el cambio entre dos capas visuales mediante Web Animations API. Incluye `cut`, `crossfade`, `fade-through-black`, `zoom` y `blur`; acepta duración y easing por escena. El reproductor utiliza dos capas de imagen para que la transición no interrumpa la escena saliente. Con `prefers-reduced-motion`, las transiciones se convierten en cambios inmediatos. La configuración opcional de una escena es `transition: { type: "crossfade", duration: 650, easing: "ease-in-out" }`.
 
 ## PWA y funcionamiento offline
 
