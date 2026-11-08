@@ -37,9 +37,9 @@ function normalizedRequest(request) {
 }
 
 async function putWithTimestamp(cache, request, response) {
-  if (!response || response.status !== 200 || response.type === "opaque") return;
+  if (!response || response.status !== 200 || response.type === "opaque") return false;
   const contentLength = Number(response.headers.get("Content-Length") || 0);
-  if (contentLength > MAX_CACHEABLE_RESOURCE_BYTES) return;
+  if (contentLength > MAX_CACHEABLE_RESOURCE_BYTES) return false;
   const headers = new Headers(response.headers);
   headers.set("X-WebVid-Cached-At", String(Date.now()));
   const stamped = new Response(response.clone().body, {
