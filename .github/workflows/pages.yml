@@ -37,6 +37,7 @@ jobs:
           node --check engine/virtual-camera-engine.mjs
           node --check engine/gesture-controller.mjs
           node --check engine/scene-player.mjs
+          node --check engine/transition-engine.mjs
 
       - name: Run automated tests
         run: node --test tests/*.test.mjs
@@ -50,14 +51,14 @@ jobs:
       - name: Assemble public site
         run: |
           set -euo pipefail
-          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css; do
+          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs; do
             test -f "$file"
           done
 
           rm -rf dist
           mkdir -p dist/experiencias dist/engine
           cp index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json dist/
-          cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css dist/engine/
+          cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs dist/engine/
 
           if [ -d experiencias ]; then
             cp -R experiencias/. dist/experiencias/
