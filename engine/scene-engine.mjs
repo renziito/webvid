@@ -41,7 +41,7 @@ export class SceneEngine {
     return this.getSnapshot();
   }
 
-  get scenes() { return this._assertAlive(); return this._scenes; }
+  get scenes() { this._assertAlive(); return this._scenes; }
   get currentScene() { return this._index >= 0 ? this._scenes[this._index] ?? null : null; }
   get currentIndex() { return this._index; }
   getSnapshot() {
