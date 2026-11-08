@@ -30,6 +30,7 @@ webvid/
 ├── tests/
 │   ├── scene-engine.test.mjs
 │   ├── virtual-camera-engine.test.mjs
+│   ├── gesture-controller.test.mjs
 │   └── validate-catalog.test.mjs
 ├── experiencias.json
 ├── index.html
@@ -49,7 +50,9 @@ El módulo `engine/scene-engine.mjs` administra la secuencia de escenas, su prep
 
 El módulo `engine/virtual-camera-engine.mjs` calcula el encuadre de una escena mediante keyframes de posición, escala y rotación. Recibe un progreso normalizado entre 0 y 1 y devuelve un transform CSS. No administra el tiempo ni crea animaciones autónomas: el reproductor controlará el progreso para mantener sincronizados cámara y duración de escena.
 
-Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final. Los gestos y las transiciones visuales se implementarán en módulos posteriores.
+Admite easing lineal, ease-in, ease-out y ease-in-out, además de respetar reduced motion mostrando directamente el encuadre final. ## Gesture Controller
+
+El módulo `engine/gesture-controller.mjs` reconoce gestos verticales mediante Pointer Events: swipe hacia arriba solicita avanzar una escena y swipe hacia abajo solicita retroceder una. Un gesto válido produce una sola acción; movimientos cortos, horizontales, secundarios o multitáctiles se ignoran. El controlador no avanza automáticamente ni muestra controles. Al conectarlo, debe montarse únicamente sobre el contenedor del reproductor; mientras está activo aplica `touch-action: none` a ese contenedor y restaura el valor anterior al destruirse. El reproductor conserva la responsabilidad de llamar a `SceneEngine.next()` o `SceneEngine.previous()`.
 
 ## PWA y funcionamiento offline
 
