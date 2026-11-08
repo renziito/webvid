@@ -36,7 +36,7 @@ function requireDirectory(path, label) {
 }
 
 function isExternalReference(value) {
-  return /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(value);
+  return /^(?:[a-z][a-z0-9+.-]*:|\\/\\/|#)/i.test(value);
 }
 
 function checkLocalReference(reference, sourceFile, experienceRoot, label) {
@@ -102,7 +102,7 @@ function checkJavaScriptReferences(source, jsFile, experienceRoot, slug) {
   }
 }
 
-function checkExperiencePresentation(html, css, slug) {
+function checkExperiencePresentation(html, css, js, slug) {
   if (!/<meta\\b(?=[^>]*name=["']viewport["'])(?=[^>]*content=["'][^"']*viewport-fit=cover)[^>]*>/i.test(html)) {
     fail(`${slug}/index.html debe incluir viewport móvil con viewport-fit=cover.`);
   }
@@ -118,10 +118,10 @@ function checkExperiencePresentation(html, css, slug) {
     .replace(/&(?:nbsp|#160);/gi, " ")
     .trim();
   if (visibleMarkup) fail(`${slug}/index.html contiene texto visible fuera de la narración visual.`);
-  if (/<audio\\b|speechSynthesis|AudioContext|HTMLAudioElement/i.test(html)) {
+  if (/<audio\\b|speechSynthesis|AudioContext|HTMLAudioElement/i.test(html + js)) {
     fail(`${slug}/index.html contiene referencias de audio no permitidas.`);
   }
-  if (!/100dvh|100svh|aspect-ratio\\s*:\\s*9\\s*\\/\\s*16/i.test(css)) {
+  if (/\\b(?:speechSynthesis|AudioContext|HTMLAudioElement|new\\s+Audio\\s*\\()/i.test(js)) {\n    fail(`${slug}/script.js contiene APIs de audio no permitidas.`);\n  }\n  if (!/100dvh|100svh|aspect-ratio\\s*:\\s*9\\s*\\/\\s*16/i.test(css)) {
     console.warn(`[WebVid] AVISO: ${slug} no declara explícitamente un viewport vertical 9:16.`);
   }
 }
@@ -196,7 +196,7 @@ for (const [index, item] of catalog.experiences.entries()) {
   checkHtmlReferences(html, htmlFile, directory, slug);
   checkCssReferences(css, cssFile, directory, slug);
   checkJavaScriptReferences(js, jsFile, directory, slug);
-  checkExperiencePresentation(html, css, slug);
+  checkExperiencePresentation(html, css, js, slug);
 
   try {
     execFileSync(process.execPath, ["--check", jsFile], { stdio: "pipe" });
