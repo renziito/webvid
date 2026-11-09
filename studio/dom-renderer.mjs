@@ -17,7 +17,7 @@ function copyComputedStyles(source, target, pseudoNodes = true) {
     for (const pseudo of ["::before", "::after"]) {
       const style = getComputedStyle(source, pseudo);
       const content = style.getPropertyValue("content");
-      if (!content || content === "none" || content === "normal" || content === '""') continue;
+      if (!content || content === "none" || content === "normal") continue;
       const node = source.ownerDocument.createElement("span");
       node.setAttribute("data-webvid-pseudo", pseudo);
       let pseudoCss = "";
