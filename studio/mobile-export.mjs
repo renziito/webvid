@@ -7,6 +7,15 @@ let active = false;
 
 const loadMediaBunny = () => import(MEDIABUNNY_URL);
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const withTimeout = (promise, ms, message) => {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message)), ms);
+    })
+  ]).finally(() => clearTimeout(timer));
+};
 const clock = seconds => {
   if (!Number.isFinite(seconds) || seconds < 0) return "—";
   const n = Math.round(seconds), h = Math.floor(n / 3600), m = Math.floor(n % 3600 / 60), s = n % 60;
@@ -93,13 +102,13 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
     if (!AudioContextClass) throw new Error("Este navegador no ofrece AudioContext para preparar el audio del MP4.");
     const audioContext = new AudioContextClass();
     try {
-      const chunkFrames = Math.max(1, Math.floor(audioBuffer.sampleRate * 4));
+      const chunkFrames = Math.max(1, Math.floor(audioBuffer.sampleRate * 2));
       const totalChunks = Math.ceil(audioBuffer.length / chunkFrames);
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
         const startFrame = chunkIndex * chunkFrames;
         const endFrame = Math.min(audioBuffer.length, startFrame + chunkFrames);
         onPhase("Codificando audio · bloque " + (chunkIndex + 1) + "/" + totalChunks + "…");
-        await audio.add(createAudioChunk(audioBuffer, startFrame, endFrame, audioContext));
+        await withTimeout(\n          audio.add(createAudioChunk(audioBuffer, startFrame, endFrame, audioContext)),\n          30_000,\n          "La codificación de audio no respondió durante 30 segundos en el bloque " + (chunkIndex + 1) + "/" + totalChunks + ". Reduce la duración o vuelve a intentar la exportación."\n        );
         onProgress({ phase:"audio", fraction:(chunkIndex + 1) / totalChunks, chunk:chunkIndex + 1, totalChunks });
         await wait(0);
       }
@@ -123,7 +132,7 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
     video.close();
     onPhase("Finalizando MP4 y escribiendo metadatos…");
     onProgress({fraction:0.97,finalizing:true});
-    await output.finalize();
+    await withTimeout(output.finalize(), 60_000, "El ensamblado final del MP4 superó 60 segundos y se canceló para evitar un bloqueo indefinido.");
     if (destination.kind === "memory") {
       const buffer = target.buffer;
       if (!buffer || buffer.byteLength < 1024) throw new Error("El MP4 resultante está vacío o incompleto.");
