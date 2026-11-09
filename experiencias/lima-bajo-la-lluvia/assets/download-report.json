@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T23:06:02Z",
+  "generated_at": "2026-11-09T23:09:39Z",
   "downloaded": [
     {
       "id": "IMG-01",
@@ -231,8 +231,8 @@
     },
     {
       "id": "IMG-39",
-      "file": "img-39.avif",
-      "bytes": 49567,
+      "file": "img-39.jpg",
+      "bytes": 139347,
       "source": "https://gestion.pe/resizer/v2/5H2Q3WOFDJFWTCGJUHOQCPCORE.jpg?auth=6f966f0262cbfc1e21de526765e2861783161a2c5197e8f14612365c463f0931&height=960&quality=75&smart=true&width=1200"
     },
     {
@@ -243,8 +243,8 @@
     },
     {
       "id": "IMG-41",
-      "file": "img-41.avif",
-      "bytes": 42020,
+      "file": "img-41.jpg",
+      "bytes": 123345,
       "source": "https://gestion.pe/resizer/v2/5DXNORNVBZA6TIZOC6VZNX3RG4.jpg?auth=95089a62b2aed1cc06a9c613da1e46a8f3845556be85e527a7d0922656bb4f99&height=874&quality=75&smart=true&width=1200"
     }
   ],
