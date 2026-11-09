@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090a0f">
-  <meta name="description" content="Editor local de sincronización cinematográfica WebVid Studio.">
+  <meta name="description" content="WebVid Studio: sincroniza audio con experiencias del PWA y exporta MP4.">
   <title>WebVid Studio · Editor</title>
   <link rel="stylesheet" href="./studio.css">
 </head>
@@ -14,45 +14,68 @@
       <a class="brand" href="../" aria-label="Volver a WebVid">WEBVID <span>STUDIO</span></a>
       <span class="local-badge"><i></i> PROCESAMIENTO LOCAL</span>
     </header>
+
     <section class="intro">
       <p class="eyebrow">POSTPRODUCCIÓN CINEMATOGRÁFICA</p>
       <h1>El ritmo de<br><em>tu historia.</em></h1>
-      <p class="lede">Sincroniza la narración con tus escenas. Revisa el resultado antes de preparar la exportación.</p>
+      <p class="lede">Selecciona una experiencia de tu biblioteca, agrega el audio y sincroniza las escenas para crear un MP4 vertical.</p>
     </section>
+
     <section class="workspace" aria-label="Proyecto de edición">
       <div class="panel project-panel">
-        <div class="panel-heading"><span>01 / PROYECTO</span><span class="muted">CONFIGURACIÓN</span></div>
-        <label for="experience">Experiencia</label>
-        <select id="experience">
-          <option value="inside-the-algorithm">Inside the Algorithm</option>
-          <option value="lima-bajo-la-lluvia" disabled>Lima bajo la lluvia · próximamente</option>
+        <div class="panel-heading"><span>01 / PROYECTO</span><span class="muted">CATÁLOGO PWA</span></div>
+        <label for="experience">Experiencia del PWA</label>
+        <select id="experience" disabled>
+          <option value="">Cargando biblioteca…</option>
         </select>
-        <label for="audioFile">Narración WAV</label>
-        <label class="file-drop" for="audioFile"><span class="file-symbol">＋</span><strong>Seleccionar archivo WAV</strong><small id="fileName">El audio permanece en este dispositivo</small></label>
-        <input id="audioFile" type="file" accept=".wav,audio/wav,audio/x-wav">
+        <p class="catalog-note" id="catalogStatus">Leyendo experiencias.json…</p>
+
+        <label for="audioFile">Pista de audio</label>
+        <label class="file-drop" for="audioFile">
+          <span class="file-symbol">＋</span>
+          <strong>Importar audio</strong>
+          <small id="fileName">WAV · MP3 · M4A · AAC · OGG · WebM</small>
+        </label>
+        <input id="audioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.webm">
         <div class="audio-meta" id="audioMeta">Sin archivo de audio</div>
+
         <div class="actions">
-          <button id="analyze" class="primary" disabled>Analizar narración</button>
+          <button id="analyze" class="primary" disabled>Analizar audio</button>
           <button id="playAudio" class="secondary" disabled>Escuchar</button>
         </div>
-        <p class="privacy-note">El archivo no se transmite ni se guarda en GitHub. Se procesa en la memoria de esta sesión.</p>
+        <button id="openRender" class="secondary render-open" disabled>Abrir lienzo de render ↗</button>
+        <p class="privacy-note">El audio se decodifica y procesa localmente. No se sube a GitHub ni se envía a un servidor.</p>
       </div>
+
       <div class="panel timeline-panel">
         <div class="panel-heading"><span>02 / SINCRONIZACIÓN</span><span class="muted" id="analysisState">ESPERANDO AUDIO</span></div>
-        <div class="wave-wrap"><canvas id="waveform" aria-label="Forma de onda de la narración"></canvas><div class="wave-empty" id="waveEmpty">La forma de onda aparecerá después del análisis</div></div>
-        <div class="timeline-summary"><span id="durationLabel">00:00</span><span id="sceneCount">6 escenas</span></div>
+        <div class="wave-wrap">
+          <canvas id="waveform" aria-label="Forma de onda del audio"></canvas>
+          <div class="wave-empty" id="waveEmpty">La forma de onda aparecerá después del análisis</div>
+        </div>
+        <div class="timeline-summary"><span id="durationLabel">00:00</span><span id="sceneCount">— escenas</span></div>
         <div id="sceneTimeline" class="scene-timeline"></div>
-        <p class="hint">El análisis propone puntos de entrada según pausas y energía de voz. Podrás ajustar cada escena manualmente.</p>
+        <p class="hint">Los cortes automáticos se proponen a partir de pausas y energía. Ajusta los puntos de entrada para que cada cambio visual coincida con la narración.</p>
       </div>
+
       <div class="panel preview-panel">
-        <div class="panel-heading"><span>03 / REVISIÓN</span><span class="muted">ANTES DE EXPORTAR</span></div>
-        <div class="preview-frame"><iframe id="filmPreview" title="Preview visual real de Inside the Algorithm" loading="lazy" allow="fullscreen"></iframe></div>
-        <div class="preview-status"><span class="status-dot"></span><span id="previewStatus">Carga un WAV para iniciar la revisión</span></div>
-        <button class="primary export" id="export" disabled>Exportación MP4 en desarrollo</button>
-        <p class="hint">El preview reproduce la experiencia real. La exportación 1080 × 1920 a 60 FPS se habilitará tras completar y validar el renderizador MP4 local.</p>
+        <div class="panel-heading"><span>03 / REVISIÓN</span><span class="muted">PREVIEW REAL</span></div>
+        <div class="preview-frame">
+          <iframe id="filmPreview" title="Preview de la experiencia seleccionada" loading="lazy" allow="fullscreen"></iframe>
+        </div>
+        <div class="preview-status"><span class="status-dot"></span><span id="previewStatus">Selecciona una experiencia del catálogo.</span></div>
+        <div class="export-spec">
+          <span>FORMATO DE SALIDA</span>
+          <strong>MP4 · H.264 + AAC</strong>
+          <small>1080 × 1920 · 60 FPS</small>
+        </div>
+        <button class="primary export" id="export" disabled>Generar MP4</button>
+        <div class="progress-track"><span id="exportProgress"></span></div>
+        <p class="export-status" id="exportStatus">Abre el lienzo de render antes de exportar. Cuando el navegador lo solicite, comparte esa pestaña.</p>
       </div>
     </section>
-    <footer>WEBVID STUDIO <span>·</span> V1.1 <span>·</span> LOCAL FIRST</footer>
+
+    <footer>WEBVID STUDIO <span>·</span> PWA EDITION <span>·</span> LOCAL FIRST</footer>
   </main>
   <script type="module" src="./studio.mjs"></script>
 </body>
