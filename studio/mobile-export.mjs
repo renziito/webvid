@@ -1,5 +1,5 @@
 import { decodeAudioFile } from "./audio-analyzer.mjs";
-import { renderDocumentFrame } from "./dom-renderer.mjs";
+import { getRenderWarnings, renderDocumentFrame, resetRenderWarnings } from "./dom-renderer.mjs";
 
 const MEDIABUNNY_URL = "https://cdn.jsdelivr.net/npm/mediabunny@1.65.2/+esm";
 const $ = selector => document.querySelector(selector);
@@ -107,6 +107,7 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
       await audioContext.close().catch(() => {});
     }
     audio.close();
+    resetRenderWarnings();
     const totalFrames = Math.ceil(duration * fps), started = performance.now();
     for (let frame = 0; frame < totalFrames; frame++) {
       const time = frame / fps, scene = sceneAtTime(time, cues, duration);
@@ -189,13 +190,20 @@ async function handleExport(event) {
       :"Almacenamiento progresivo preparado. La duración depende de los recursos disponibles del dispositivo.";
     const result=await renderMp4({iframe,audioBuffer,cues,duration,destination,
       onPhase:message=>{status.textContent=message;},onProgress:updateProgress});
+    let completionMessage;
     if(result instanceof Blob){
       download(result,destination.filename);
-      status.textContent="MP4 generado y descargado: "+destination.filename+" · "+(result.size/1048576).toFixed(1)+" MB.";
+      completionMessage="MP4 generado y descargado: "+destination.filename+" · "+(result.size/1048576).toFixed(1)+" MB.";
     } else {
-      status.textContent=result.savedDirectly?"MP4 guardado correctamente: "+result.filename:
+      completionMessage=result.savedDirectly?"MP4 guardado correctamente: "+result.filename:
         "MP4 generado y descargado: "+result.filename+" · "+(result.size/1048576).toFixed(1)+" MB.";
     }
+    const renderWarnings = getRenderWarnings();
+    if (renderWarnings.skippedExternalImages.length) {
+      completionMessage += " Aviso: "+renderWarnings.skippedExternalImages.length+
+        " imagen(es) externa(s) sin permiso CORS se sustituyeron por fondos neutros para completar el vídeo.";
+    }
+    status.textContent=completionMessage;
     $("#exportProgress").style.width="100%"; $("#exportProgress").parentElement?.setAttribute("aria-valuenow","100");
   } catch(error) {
     if(destination?.discard) await destination.discard();
