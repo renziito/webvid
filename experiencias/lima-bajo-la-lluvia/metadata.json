@@ -1,11 +1,11 @@
 {
   "title": "Lima bajo la lluvia",
   "slug": "lima-bajo-la-lluvia",
-  "version": "V12",
-  "status": "approved-pending-deployment",
+  "version": "V13",
+  "status": "draft-review",
   "aspect_ratio": "9:16",
   "estimated_visual_duration_seconds": 66,
-  "scene_count": 14,
+  "scene_count": 15,
   "scene_ids": [
     "SC-01B",
     "SC-02",
@@ -20,8 +20,9 @@
     "SC-09-C",
     "SC-09-D",
     "SC-09-E",
-    "SC-09-F"
+    "SC-09-F",
+    "SC-10"
   ],
-  "updated_at": "2026-11-08",
-  "notes": "Paquete estructurado desde el HTML V12 aprobado. Los recursos fotográficos siguen siendo referencias HTTPS externas del HTML original; no se descargaron ni se verificaron derechos de reutilización. La V12 conserva cifras, rótulos y créditos visibles por aprobación expresa del usuario, aunque la regla general de WebVid exige cero texto visible."
+  "updated_at": "2026-11-09",
+  "notes": "Se añade SC-10 como escena final de créditos con fuentes de investigación, fotografía y cartografía. El inventario completo de URLs de imágenes queda en assets/sources.json. Las fotografías aún cargan desde sus URLs originales; no se han descargado ni convertido en assets locales."
 }
