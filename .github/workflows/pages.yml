@@ -2,7 +2,7 @@ name: Validate and deploy WebVid
 
 on:
   push:
-    branches: ["main", "fix/**"]
+    branches: ["main", "fix/**", "feature/**"]
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,8 @@ jobs:
         run: |
           node --check sw.js
           node --check scripts/validate-catalog.mjs
+          node --check studio/studio.mjs
+          node --check studio/audio-analyzer.mjs
           node --check engine/scene-engine.mjs
           node --check engine/virtual-camera-engine.mjs
           node --check engine/gesture-controller.mjs
@@ -51,9 +53,10 @@ jobs:
           done
 
           rm -rf dist
-          mkdir -p dist/experiencias dist/engine
+          mkdir -p dist/experiencias dist/engine dist/studio
           cp index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json dist/
           cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs dist/engine/
+          cp studio/index.html studio/studio.css studio/studio.mjs studio/audio-analyzer.mjs dist/studio/
 
           if [ -d experiencias ]; then
             cp -R experiencias/. dist/experiencias/
