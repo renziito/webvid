@@ -26,42 +26,28 @@
         <select id="experience" disabled><option value="">Cargando biblioteca…</option></select>
         <p class="catalog-note" id="catalogStatus">Leyendo experiencias.json…</p>
         <label for="audioFile">Pista de audio</label>
-        <label class="file-drop" for="audioFile">
-          <span class="file-symbol">＋</span><strong>Importar audio</strong>
-          <small id="fileName">WAV · MP3 · M4A · AAC · OGG · WebM</small>
-        </label>
+        <label class="file-drop" for="audioFile"><span class="file-symbol">＋</span><strong>Importar audio</strong><small id="fileName">WAV · MP3 · M4A · AAC · OGG · WebM</small></label>
         <input id="audioFile" type="file" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.webm">
         <div class="audio-meta" id="audioMeta">Sin archivo de audio</div>
-        <div class="actions">
-          <button id="analyze" class="primary" disabled>Analizar audio</button>
-          <button id="playAudio" class="secondary" disabled>Escuchar</button>
-        </div>
+        <div class="actions"><button id="analyze" class="primary" disabled>Analizar audio</button><button id="playAudio" class="secondary" disabled>Escuchar</button></div>
         <button id="openRender" class="secondary render-open" disabled>Abrir lienzo de render ↗</button>
         <p class="privacy-note">El audio se decodifica y procesa localmente. No se sube a GitHub ni se envía a un servidor.</p>
       </div>
       <div class="panel timeline-panel">
         <div class="panel-heading"><span>02 / SINCRONIZACIÓN</span><span class="muted" id="analysisState">ESPERANDO AUDIO</span></div>
-        <div class="wave-wrap">
-          <canvas id="waveform" aria-label="Forma de onda del audio"></canvas>
-          <div class="wave-empty" id="waveEmpty">La forma de onda aparecerá después del análisis</div>
-        </div>
+        <div class="wave-wrap"><canvas id="waveform" aria-label="Forma de onda del audio"></canvas><div class="wave-empty" id="waveEmpty">La forma de onda aparecerá después del análisis</div></div>
         <div class="timeline-summary"><span id="durationLabel">00:00</span><span id="sceneCount">— escenas</span></div>
         <div id="sceneTimeline" class="scene-timeline"></div>
         <p class="hint">Los cortes automáticos se proponen a partir de pausas y energía. Ajusta los puntos de entrada para que cada cambio visual coincida con la narración.</p>
       </div>
       <div class="panel preview-panel">
         <div class="panel-heading"><span>03 / REVISIÓN</span><span class="muted">PREVIEW REAL</span></div>
-        <div class="preview-frame">
-          <iframe id="filmPreview" title="Preview de la experiencia seleccionada" loading="lazy" allow="fullscreen"></iframe>
-        </div>
+        <div class="preview-frame"><iframe id="filmPreview" title="Preview de la experiencia seleccionada" loading="lazy" allow="fullscreen"></iframe></div>
         <div class="preview-status"><span class="status-dot"></span><span id="previewStatus">Selecciona una experiencia del catálogo.</span></div>
-        <div class="export-spec">
-          <span>FORMATO DE SALIDA</span><strong>MP4 · H.264 + AAC</strong>
-          <small>1080 × 1920 · 30 FPS · render directo</small>
-        </div>
+        <div class="export-spec"><span>FORMATO DE SALIDA</span><strong>MP4 · H.264 + AAC</strong><small>1080 × 1920 · 30 FPS · render directo</small></div>
         <button class="primary export" id="export" disabled>Generar MP4</button>
-        <div class="progress-track"><span id="exportProgress"></span></div>
-        <p class="export-status" id="exportStatus">Abre el lienzo Render. La exportación directa no necesita compartir ni capturar la pantalla.</p>
+        <div class="progress-track" role="progressbar" aria-label="Progreso de exportación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="exportProgress"></span></div>
+        <p class="export-status" id="exportStatus" aria-live="polite">Abre el lienzo Render. La exportación directa no necesita compartir ni capturar la pantalla.</p>
       </div>
     </section>
     <footer>WEBVID STUDIO <span>·</span> PWA EDITION <span>·</span> LOCAL FIRST</footer>
