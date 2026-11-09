@@ -62,6 +62,15 @@ async function createDestination(slug) {
   return { kind:"memory", filename, writable:null };
 }
 
+function createAudioChunk(source, startFrame, endFrame, context) {
+  const length = endFrame - startFrame;
+  const chunk = context.createBuffer(source.numberOfChannels, length, source.sampleRate);
+  for (let channel = 0; channel < source.numberOfChannels; channel++) {
+    chunk.copyToChannel(source.getChannelData(channel).subarray(startFrame, endFrame), channel);
+  }
+  return chunk;
+}
+
 async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onProgress, onPhase }) {
   if (typeof VideoEncoder === "undefined" || typeof AudioEncoder === "undefined")
     throw new Error("Este navegador no ofrece WebCodecs. La exportación MP4 directa no está disponible.");
@@ -70,14 +79,34 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
   canvas.width = width; canvas.height = height;
   const target = destination.kind === "memory" ? new BufferTarget()
     : new StreamTarget(destination.writable, { chunked:true, chunkSize:1024*1024 });
+  let bytesWritten = 0;
+  if (typeof target.on === "function") {
+    target.on("write", ({ start, end }) => { bytesWritten = Math.max(bytesWritten, Number(end) || 0); });
+  }
   const output = new Output({ format:new Mp4OutputFormat(), target });
   const video = new CanvasSource(canvas, { codec:"avc", quality:new Quality({bitrate:10_000_000}), transform:{frameRate:fps} });
   const audio = new AudioBufferSource({ codec:"aac", quality:new Quality({bitrate:192_000}), transform:{numberOfChannels:2,sampleRate:48_000} });
   output.addVideoTrack(video, {frameRate:fps}); output.addAudioTrack(audio);
   await output.start();
   try {
-    onPhase("Escribiendo audio y preparando vídeo…");
-    await audio.add(audioBuffer); audio.close();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) throw new Error("Este navegador no ofrece AudioContext para preparar el audio del MP4.");
+    const audioContext = new AudioContextClass();
+    try {
+      const chunkFrames = Math.max(1, Math.floor(audioBuffer.sampleRate * 4));
+      const totalChunks = Math.ceil(audioBuffer.length / chunkFrames);
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const startFrame = chunkIndex * chunkFrames;
+        const endFrame = Math.min(audioBuffer.length, startFrame + chunkFrames);
+        onPhase("Codificando audio · bloque " + (chunkIndex + 1) + "/" + totalChunks + "…");
+        await audio.add(createAudioChunk(audioBuffer, startFrame, endFrame, audioContext));
+        onProgress({ phase:"audio", fraction:(chunkIndex + 1) / totalChunks, chunk:chunkIndex + 1, totalChunks });
+        await wait(0);
+      }
+    } finally {
+      await audioContext.close().catch(() => {});
+    }
+    audio.close();
     const totalFrames = Math.ceil(duration * fps), started = performance.now();
     for (let frame = 0; frame < totalFrames; frame++) {
       const time = frame / fps, scene = sceneAtTime(time, cues, duration);
@@ -85,20 +114,24 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
       await video.add(time, 1/fps);
       if (frame % 3 === 0 || frame === totalFrames - 1) {
         const fraction = (frame+1)/totalFrames, elapsed = (performance.now()-started)/1000;
-        onProgress({fraction,elapsed,remaining:elapsed/fraction-elapsed,frame:frame+1,totalFrames,scene:scene.index+1,sceneCount:cues.length,mediaTime:Math.min(time,duration),duration});
+        onProgress({phase:"video",fraction,elapsed,remaining:elapsed/fraction-elapsed,frame:frame+1,totalFrames,scene:scene.index+1,sceneCount:cues.length,mediaTime:Math.min(time,duration),duration});
         await wait(0);
       }
     }
+    if (totalFrames < 1) throw new Error("No hay fotogramas de vídeo para exportar.");
     video.close();
     onPhase("Finalizando MP4 y escribiendo metadatos…");
     onProgress({fraction:0.97,finalizing:true});
     await output.finalize();
     if (destination.kind === "memory") {
       const buffer = target.buffer;
-      if (!buffer || buffer.byteLength < 1024) throw new Error("El archivo MP4 resultante está vacío.");
+      if (!buffer || buffer.byteLength < 1024) throw new Error("El MP4 resultante está vacío o incompleto.");
       return new Blob([buffer], {type:"video/mp4"});
     }
-    return await destination.finish();
+    if (bytesWritten < 1024) throw new Error("El MP4 no contiene datos suficientes. No se entregará un archivo vacío.");
+    const result = await destination.finish();
+    if (Number.isFinite(result.size) && result.size < 1024) throw new Error("El MP4 guardado está vacío o incompleto.");
+    return result;
   } catch (error) {
     try { await output.cancel(); } catch {}
     if (destination.discard) await destination.discard();
@@ -117,11 +150,18 @@ function updateProgress(info) {
   if (info.finalizing) {
     if(bar) bar.style.width="97%";
     track?.setAttribute("aria-valuenow","97");
-    $("#exportStatus").textContent="97% · Finalizando MP4 y escribiendo metadatos. Esta fase depende del codificador y del almacenamiento…";
+    $("#exportStatus").textContent="97% · Finalizando MP4 y escribiendo metadatos…";
     return;
   }
-  const percent=Math.round(info.fraction*95), remaining=Number.isFinite(info.remaining)?" · Restante aprox. "+clock(info.remaining):"";
-  if(bar) bar.style.width=(info.fraction*95)+"%";
+  if (info.phase === "audio") {
+    const percent=Math.round(info.fraction*10);
+    if(bar) bar.style.width=percent+"%";
+    track?.setAttribute("aria-valuenow",String(percent));
+    $("#exportStatus").textContent=percent+"% · Codificando audio · Bloque "+info.chunk+"/"+info.totalChunks;
+    return;
+  }
+  const percent=10+Math.round(info.fraction*85), remaining=Number.isFinite(info.remaining)?" · Restante aprox. "+clock(info.remaining):"";
+  if(bar) bar.style.width=percent+"%";
   track?.setAttribute("aria-valuenow",String(percent));
   $("#exportStatus").textContent=percent+"% · Escena "+info.scene+"/"+info.sceneCount+
     " · Frame "+info.frame.toLocaleString("es-ES")+"/"+info.totalFrames.toLocaleString("es-ES")+
