@@ -66,7 +66,6 @@ function studioExperienceUrl(item) {
 }
 
 function updateExportAvailability(preserveStatus = false) {
-  const captureAvailable = Boolean(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
   const codecsAvailable = typeof VideoEncoder !== "undefined" && typeof AudioEncoder !== "undefined";
   const ready = Boolean(
     state.experience &&
@@ -74,22 +73,19 @@ function updateExportAvailability(preserveStatus = false) {
     state.analysis &&
     state.cues.length &&
     state.stage &&
-    captureAvailable &&
     codecsAvailable &&
     !state.isExporting
   );
   exportButton.disabled = !ready;
   if (!preserveStatus) {
-    if (!captureAvailable) {
-      setExportStatus("Este navegador no permite capturar la pestaña. Abre WebVid Studio en un navegador compatible con captura de pantalla.");
-    } else if (!codecsAvailable) {
+    if (!codecsAvailable) {
       setExportStatus("Este navegador no ofrece WebCodecs. La exportación H.264/AAC MP4 no está disponible aquí.");
     } else if (!state.stage) {
       setExportStatus("Abre el lienzo de render. Después comparte esa pestaña cuando comience la exportación.");
     } else if (!state.audioBuffer) {
       setExportStatus("Importa una pista de audio para preparar el video.");
     } else if (!state.isExporting) {
-      setExportStatus("Listo. Al generar, selecciona la pestaña «Render · WebVid Studio» en el selector del navegador.");
+      setExportStatus("Listo. Genera el MP4 directamente desde el DOM; no necesitas compartir la pantalla.");
     }
   }
 }
