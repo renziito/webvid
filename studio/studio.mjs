@@ -7,15 +7,32 @@ const playButton = $("#playAudio");
 const exportButton = $("#export");
 const canvas = $("#waveform");
 const context = canvas.getContext("2d");
-const state = { file: null, audio: null, analysis: null, cues: [], audioUrl: null, audioElement: null, scenes: 6 };
+const preview = $("#filmPreview");
+const state = { file: null, audio: null, analysis: null, cues: [], audioUrl: null, audioElement: null, scenes: 6, activeScene: 0, previewReady: false };
 
 function formatTime(seconds) {
   const value = Math.max(0, Math.floor(seconds));
   return String(Math.floor(value / 60)).padStart(2, "0") + ":" + String(value % 60).padStart(2, "0");
 }
-
 function setStatus(message) { $("#analysisState").textContent = message.toUpperCase(); }
 function setPreview(message) { $("#previewStatus").textContent = message; }
+function sendPreview(type, payload = {}) {
+  if (!preview.contentWindow || !state.previewReady) return;
+  preview.contentWindow.postMessage({ channel: "WEBVID_STUDIO_PREVIEW", type, ...payload }, location.origin);
+}
+function selectScene(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= state.scenes) return;
+  state.activeScene = index;
+  sendPreview("SET_SCENE", { index });
+  document.querySelectorAll(".scene-row").forEach((row, rowIndex) => row.classList.toggle("active", rowIndex === index));
+}
+
+preview.addEventListener("load", () => {
+  state.previewReady = true;
+  sendPreview("SET_SCENE", { index: state.activeScene });
+  setPreview("Preview real de Inside the Algorithm conectado.");
+});
+preview.src = "../experiencias/inside-the-algorithm/index.html?studio=1";
 
 fileInput.addEventListener("change", () => {
   const file = fileInput.files?.[0];
@@ -34,12 +51,18 @@ fileInput.addEventListener("change", () => {
   state.audioElement?.pause();
   state.audioElement = new Audio(state.audioUrl);
   state.audioElement.addEventListener("ended", () => { playButton.textContent = "Escuchar"; });
+  state.audioElement.addEventListener("timeupdate", () => {
+    if (!state.cues.length) return;
+    let index = 0;
+    for (let i = 1; i < state.cues.length; i++) if (state.audioElement.currentTime >= state.cues[i]) index = i;
+    if (index !== state.activeScene) selectScene(index);
+  });
   $("#fileName").textContent = file.name;
   $("#audioMeta").textContent = (file.size / 1024 / 1024).toFixed(1) + " MB · WAV local";
   analyzeButton.disabled = false;
   playButton.disabled = false;
   exportButton.disabled = true;
-  exportButton.textContent = "Revisión técnica pendiente";
+  exportButton.textContent = "Exportación MP4 en desarrollo";
   setStatus("AUDIO CARGADO");
   setPreview("Analiza la narración para generar los puntos de sincronización.");
   $("#waveEmpty").hidden = false;
@@ -62,8 +85,9 @@ analyzeButton.addEventListener("click", async () => {
     $("#durationLabel").textContent = formatTime(state.analysis.duration);
     $("#sceneCount").textContent = state.scenes + " escenas";
     $("#audioMeta").textContent = formatTime(state.analysis.duration) + " · " + state.analysis.sampleRate + " Hz · " + state.analysis.channels + " canal(es)";
+    selectScene(0);
     setStatus("ANÁLISIS COMPLETADO");
-    setPreview("Sincronización propuesta. Ajusta los puntos de entrada y revisa la película.");
+    setPreview("Puntos de sincronización propuestos. Reproduce el WAV para revisar cada escena.");
   } catch (error) {
     setStatus("ERROR DE ANÁLISIS");
     setPreview(error.message || "No se pudo analizar el WAV.");
@@ -82,22 +106,29 @@ playButton.addEventListener("click", async () => {
     playButton.textContent = "Escuchar";
   }
 });
-$("#experience").addEventListener("change", async () => {
-  if (!state.analysis) return;
-  state.scenes = await getSceneCount($("#experience").value);
-  state.cues = suggestSceneCues(state.analysis, state.scenes);
-  renderTimeline();
-  $("#sceneCount").textContent = state.scenes + " escenas";
+
+$("#experience").addEventListener("change", () => {
+  if ($("#experience").value !== "inside-the-algorithm") {
+    setPreview("Esta experiencia todavía no tiene adaptador de preview determinista.");
+    return;
+  }
+  preview.src = "../experiencias/inside-the-algorithm/index.html?studio=1";
 });
 
 function renderTimeline() {
   const root = $("#sceneTimeline");
   root.replaceChildren();
   state.cues.forEach((cue, index) => {
-    const row = document.createElement("label");
+    const row = document.createElement("div");
     row.className = "scene-row";
-    const title = document.createElement("span");
+    const title = document.createElement("button");
+    title.type = "button";
+    title.className = "scene-select";
     title.textContent = "SC-" + String(index + 1).padStart(2, "0");
+    title.addEventListener("click", () => {
+      selectScene(index);
+      if (state.audioElement) state.audioElement.currentTime = cue;
+    });
     const slider = document.createElement("input");
     slider.type = "range";
     slider.min = index === 0 ? 0 : state.cues[index - 1] + 0.25;
@@ -111,10 +142,12 @@ function renderTimeline() {
       state.cues[index] = Number(slider.value);
       output.textContent = formatTime(state.cues[index]);
       drawWaveform(state.analysis.waveform);
+      if (index === state.activeScene) selectScene(index);
     });
     row.append(title, slider, output);
     root.append(row);
   });
+  selectScene(state.activeScene);
 }
 
 function drawWaveform(points) {
@@ -146,17 +179,10 @@ function drawWaveform(points) {
 }
 
 async function getSceneCount(slug) {
-  try {
-    const response = await fetch("../experiencias/" + slug + "/metadata.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Metadata unavailable");
-    const metadata = await response.json();
-    return Number.isInteger(metadata.scenes) && metadata.scenes > 0 ? metadata.scenes : 6;
-  } catch { return 6; }
+  if (slug !== "inside-the-algorithm") return 6;
+  return 6;
 }
-
-window.addEventListener("resize", () => {
-  if (state.analysis) drawWaveform(state.analysis.waveform);
-});
+window.addEventListener("resize", () => { if (state.analysis) drawWaveform(state.analysis.waveform); });
 window.addEventListener("pagehide", () => {
   state.audioElement?.pause();
   if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
