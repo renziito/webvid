@@ -42,8 +42,8 @@ jobs:
           successes, failures = [], []
 
           signatures = {
-              b"\\xff\\xd8\\xff": ".jpg",
-              b"\\x89PNG\\r\\n\\x1a\\n": ".png",
+              bytes.fromhex("ffd8ff"): ".jpg",
+              bytes.fromhex("89504e470d0a1a0a"): ".png",
               b"GIF87a": ".gif",
               b"GIF89a": ".gif",
               b"RIFF": ".webp",
@@ -159,7 +159,7 @@ jobs:
           if [ -d experiencias ]; then cp -R experiencias/. dist/experiencias/; fi
           rm -f dist/experiencias/.gitkeep
           touch dist/.nojekyll
-          if find dist -type f \\( -name "*.md" -o -name "*.txt" -o -name "*.pdf" -o -name "*.doc" -o -name "*.docx" \\) | grep -q .; then
+          if find dist -type f \( -name "*.md" -o -name "*.txt" -o -name "*.pdf" -o -name "*.doc" -o -name "*.docx" \) | grep -q .; then
             echo "Unexpected documentation file in public artifact."
             exit 1
           fi
