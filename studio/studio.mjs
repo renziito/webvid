@@ -499,8 +499,9 @@ exportButton.addEventListener("click", async () => {
       height: 1920,
       fps: 60,
       onProgress: progress => {
+        syncAtTime(progress * duration);
         $("#exportProgress").style.width = Math.round(progress * 100) + "%";
-        setExportStatus("Renderizando… " + Math.round(progress * 100) + "%");
+        setExportStatus("Renderizando y sincronizando escenas… " + Math.round(progress * 100) + "%");
       }
     });
 
