@@ -25,7 +25,7 @@
         <label for="experience">Experiencia</label>
         <select id="experience">
           <option value="inside-the-algorithm">Inside the Algorithm</option>
-          <option value="lima-bajo-la-lluvia">Lima bajo la lluvia</option>
+          <option value="lima-bajo-la-lluvia" disabled>Lima bajo la lluvia · próximamente</option>
         </select>
         <label for="audioFile">Narración WAV</label>
         <label class="file-drop" for="audioFile"><span class="file-symbol">＋</span><strong>Seleccionar archivo WAV</strong><small id="fileName">El audio permanece en este dispositivo</small></label>
@@ -46,10 +46,10 @@
       </div>
       <div class="panel preview-panel">
         <div class="panel-heading"><span>03 / REVISIÓN</span><span class="muted">ANTES DE EXPORTAR</span></div>
-        <div class="preview-frame"><div class="preview-art"><div class="preview-orb"></div><div class="preview-copy">WEBVID<br><em>STUDIO</em><small>PREVISUALIZACIÓN DE PROYECTO</small></div></div></div>
+        <div class="preview-frame"><iframe id="filmPreview" title="Preview visual real de Inside the Algorithm" loading="lazy" allow="fullscreen"></iframe></div>
         <div class="preview-status"><span class="status-dot"></span><span id="previewStatus">Carga un WAV para iniciar la revisión</span></div>
-        <button class="primary export" id="export" disabled>Revisión técnica pendiente</button>
-        <p class="hint">La exportación se habilitará cuando el renderizador MP4 local supere las pruebas de compatibilidad del dispositivo. Nunca se exportará sin tu aprobación.</p>
+        <button class="primary export" id="export" disabled>Exportación MP4 en desarrollo</button>
+        <p class="hint">El preview reproduce la experiencia real. La exportación 1080 × 1920 a 60 FPS se habilitará tras completar y validar el renderizador MP4 local.</p>
       </div>
     </section>
     <footer>WEBVID STUDIO <span>·</span> V1.1 <span>·</span> LOCAL FIRST</footer>
