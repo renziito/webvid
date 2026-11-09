@@ -48,6 +48,18 @@ jobs:
               b"GIF89a": ".gif",
               b"RIFF": ".webp",
           }
+          # AVIF es un contenedor ISO-BMFF: ftyp + marca avif/avis.
+          def detected_extension(payload, content_type):
+              for signature, ext in signatures.items():
+                  if payload.startswith(signature):
+                      if signature == b"RIFF" and payload[8:12] != b"WEBP":
+                          continue
+                      return ext
+              if len(payload) >= 12 and payload[4:8] == b"ftyp" and payload[8:12] in (b"avif", b"avis"):
+                  return ".avif"
+              if content_type == "image/avif":
+                  raise ValueError("Content-Type image/avif pero firma AVIF inválida")
+              return None
 
           for item in data.get("image_assets", []):
               asset_id = item["id"]
@@ -67,13 +79,7 @@ jobs:
                       raise ValueError(f"respuesta demasiado pequeña: {len(payload)} bytes")
                   if len(payload) > 15 * 1024 * 1024:
                       raise ValueError("supera el límite de 15 MB")
-                  extension = None
-                  for signature, ext in signatures.items():
-                      if payload.startswith(signature):
-                          extension = ext
-                          break
-                  if payload.startswith(b"RIFF") and payload[8:12] == b"WEBP":
-                      extension = ".webp"
+                  extension = detected_extension(payload, content_type)
                   if not extension:
                       raise ValueError(f"contenido no reconocido como imagen (Content-Type: {content_type})")
                   filename = f"{asset_id.lower()}{extension}"
