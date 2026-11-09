@@ -33,6 +33,7 @@ jobs:
           node --check scripts/validate-catalog.mjs
           node --check studio/studio.mjs
           node --check studio/audio-analyzer.mjs
+          node --check experiencias/inside-the-algorithm/script.js
           node --check engine/scene-engine.mjs
           node --check engine/virtual-camera-engine.mjs
           node --check engine/gesture-controller.mjs
