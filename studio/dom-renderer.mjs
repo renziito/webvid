@@ -1,7 +1,7 @@
 const FRAME_TIMEOUT_MS = 12000;
 
-function nextFrame() {
-  return new Promise(resolve => requestAnimationFrame(resolve));
+function nextFrame(win) {
+  return new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
 }
 
 function copyComputedStyles(source, target, pseudoNodes = true) {
@@ -169,8 +169,7 @@ export async function renderDocumentFrame({ iframe, canvas, sceneIndex, progress
     progress: Math.max(0, Math.min(1, progress))
   }, location.origin);
 
-  await nextFrame();
-  await nextFrame();
+  await nextFrame(win);
   if (doc.fonts?.ready) await Promise.race([
     doc.fonts.ready,
     new Promise(resolve => setTimeout(resolve, 2500))
