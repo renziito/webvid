@@ -429,6 +429,7 @@ openRenderButton.addEventListener("click", () => {
   if (!state.experience) return;
   const url = new URL("./render.html", location.href);
   url.searchParams.set("experience", state.experience.slug);
+  state.stage = null;
   try {
     if (state.renderWindow && !state.renderWindow.closed) {
       state.renderWindow.location.href = url.href;
@@ -440,7 +441,6 @@ openRenderButton.addEventListener("click", () => {
       setExportStatus("El navegador bloqueó la nueva pestaña. Permite ventanas emergentes para WebVid y vuelve a intentarlo.");
       return;
     }
-    state.stage = null;
     setPreview("Lienzo de render abierto. Esperando que comunique su área de captura…");
     setExportStatus("En el lienzo que se abrió, deja cargar la experiencia. Regresa aquí cuando esté listo.");
     updateExportAvailability();
