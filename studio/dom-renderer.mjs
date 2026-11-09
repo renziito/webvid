@@ -1,8 +1,43 @@
 const FRAME_TIMEOUT_MS = 12000;
 const inlineImageCache = new Map();
+const skippedExternalImages = new Set();
+const TRANSPARENT_PIXEL = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
+export function resetRenderWarnings() {
+  skippedExternalImages.clear();
+}
+
+export function getRenderWarnings() {
+  return { skippedExternalImages: [...skippedExternalImages] };
+}
 
 function nextFrame(win) {
   return new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
+}
+
+function isExternalResourceUrl(rawValue) {
+  try {
+    const value = rawValue.replace(/^url\\((['"]?)(.*?)\\1\\)$/i, "$2").trim();
+    const url = new URL(value, location.href);
+    return /^https?:$/.test(url.protocol) && url.origin !== location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeCssImageValue(property, value) {
+  const imageProperties = new Set([
+    "background-image",
+    "mask-image",
+    "-webkit-mask-image",
+    "border-image-source",
+    "list-style-image",
+    "content"
+  ]);
+  if (!imageProperties.has(property) || !value || value === "none") return value;
+  return value.replace(/url\\((?:"[^"]*"|'[^']*'|[^)]*)\\)/gi, token =>
+    isExternalResourceUrl(token) ? "none" : token
+  );
 }
 
 function copyComputedStyles(source, target, pseudoNodes = true) {
@@ -10,7 +45,8 @@ function copyComputedStyles(source, target, pseudoNodes = true) {
   let css = "";
   for (let i = 0; i < computed.length; i++) {
     const property = computed[i];
-    css += property + ":" + computed.getPropertyValue(property) + ";";
+    const value = sanitizeCssImageValue(property, computed.getPropertyValue(property));
+    css += property + ":" + value + ";";
   }
   target.setAttribute("style", css);
 
@@ -24,7 +60,8 @@ function copyComputedStyles(source, target, pseudoNodes = true) {
       let pseudoCss = "";
       for (let i = 0; i < style.length; i++) {
         const property = style[i];
-        pseudoCss += property + ":" + style.getPropertyValue(property) + ";";
+        const value = sanitizeCssImageValue(property, style.getPropertyValue(property));
+        pseudoCss += property + ":" + value + ";";
       }
       node.setAttribute("style", pseudoCss);
       if (content.startsWith('"') || content.startsWith("'")) {
@@ -45,10 +82,19 @@ function blobToDataUrl(blob) {
   });
 }
 
+function applyImageFallback(target, imageUrl) {
+  target.setAttribute("src", TRANSPARENT_PIXEL);
+  target.setAttribute("data-webvid-image-fallback", "cors");
+  target.style.backgroundColor = "#17262c";
+  target.style.backgroundImage = "linear-gradient(145deg, rgba(28,55,62,.96), rgba(7,15,20,.98))";
+  target.style.backgroundSize = "cover";
+  skippedExternalImages.add(imageUrl);
+}
+
 async function inlineImage(source, target) {
   const imageUrl = source.currentSrc || source.src;
   if (!imageUrl || imageUrl.startsWith("data:") || imageUrl.startsWith("blob:")) {
-    target.setAttribute("src", imageUrl);
+    if (imageUrl) target.setAttribute("src", imageUrl);
     return;
   }
   target.removeAttribute("srcset");
@@ -57,7 +103,7 @@ async function inlineImage(source, target) {
     let dataUrlPromise = inlineImageCache.get(imageUrl);
     if (!dataUrlPromise) {
       dataUrlPromise = (async () => {
-        const response = await fetch(imageUrl, { mode: "cors", credentials: "omit" });
+        const response = await fetch(imageUrl, { mode: "cors", credentials: "omit", cache: "force-cache" });
         if (!response.ok) throw new Error("HTTP " + response.status);
         return blobToDataUrl(await response.blob());
       })();
@@ -66,7 +112,9 @@ async function inlineImage(source, target) {
     }
     target.setAttribute("src", await dataUrlPromise);
   } catch {
-    throw new Error("Una imagen externa bloquea el render directo por CORS: " + imageUrl);
+    // Una imagen remota sin cabeceras CORS no puede copiarse a Canvas.
+    // Se conserva su caja y se aplica un fondo neutro para que no bloquee todo el MP4.
+    applyImageFallback(target, imageUrl);
   }
 }
 
