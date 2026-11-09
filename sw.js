@@ -297,7 +297,7 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  const isStudioAsset = url.pathname.startsWith(APP_ROOT + "studio/") && /\\.(?:mjs|js|css)$/.test(url.pathname);
+  const isStudioAsset = url.pathname.startsWith(APP_ROOT + "studio/") && /\.(?:mjs|js|css)$/.test(url.pathname);
   if (isStudioAsset) {
     event.respondWith(networkFirst(request, SHELL_CACHE));
     return;
