@@ -1,54 +1,45 @@
 # WebVid Studio — editor del PWA
 
-Estado: exportación directa en rama de desarrollo; pendiente de validación en navegador y Samsung S25.
+Estado: exportación progresiva en rama de desarrollo; pendiente de validación en navegador y Samsung S25.
 
 ## Objetivo
 
 Studio lee el catálogo del PWA, carga la experiencia seleccionada y permite sincronizar una pista de audio local con las escenas. No importa ZIP ni HTML arbitrario.
 
-## Flujo
+## Render directo y almacenamiento
 
-1. Leer el catálogo PWA desde ../experiencias.json.
-2. Cargar la experiencia y su metadata.json.
-3. Obtener IDs de escena desde metadata o detectar las escenas del HTML.
-4. Importar y decodificar audio localmente.
-5. Calcular forma de onda y proponer puntos de entrada a partir de pausas.
-6. Revisar y ajustar manualmente los cortes.
-7. Sincronizar escena y progreso de animación con el reloj del audio.
-8. Abrir el lienzo Render y generar MP4 mediante render directo del documento, sin getDisplayMedia ni captura de pestaña.
-
-## Render directo
-
-- Salida: 1080 × 1920, MP4 H.264 + AAC.
-- Cadencia actual: 30 FPS para reducir carga de CPU, memoria y codificación en móviles. No se promete 60 FPS en dispositivos móviles.
-- Motor de codificación/multiplexado: Mediabunny y WebCodecs.
-- Cada frame se reconstruye desde el DOM de la escena activa mediante estilos computados y SVG foreignObject, y se rasteriza a un canvas que alimenta el codificador.
-- El AudioBuffer local se agrega como pista AAC independiente.
-- El proceso se ejecuta en el navegador; no se sube audio ni video a un servidor.
-- El búfer final permanece en memoria y el límite de duración sigue siendo 90 segundos.
+- Salida: 1080 × 1920, MP4 H.264 + AAC a 30 FPS.
+- Se eliminó el límite fijo de duración de 90 segundos.
+- Mediabunny StreamTarget escribe el MP4 progresivamente, en bloques, a almacenamiento local en lugar de acumular todo el vídeo en un ArrayBuffer.
+- Prioridad: selector de guardado del navegador; OPFS (almacenamiento privado del origen) cuando esté disponible; BufferTarget en memoria como último recurso.
+- En navegadores sin almacenamiento progresivo, exportaciones largas pueden consumir mucha memoria. No se garantiza duración ilimitada.
+- El audio se decodifica a AudioBuffer antes de codificarse; pistas largas también consumen memoria.
+- El progreso muestra frames, escena, tiempo transcurrido y una estimación restante basada en la velocidad observada.
+- La finalización y escritura de metadatos MP4 es una fase separada; su duración no puede predecirse con precisión.
+- El almacenamiento progresivo reduce el crecimiento de RAM del archivo de salida, pero requiere espacio libre en el dispositivo.
 
 ## Compatibilidad y límites conocidos
 
-- Se requieren HTTPS, WebCodecs (VideoEncoder y AudioEncoder), soporte de H.264/AAC y SVG foreignObject.
+- Se requieren HTTPS, WebCodecs (VideoEncoder y AudioEncoder), H.264/AAC y SVG foreignObject.
 - No se solicita permiso de captura de pantalla ni se necesita compartir una pestaña.
-- SVG foreignObject tiene diferencias entre navegadores. Algunas experiencias con mapas, canvas protegidos por CORS, imágenes remotas sin permisos CORS, filtros o recursos externos pueden no rasterizarse correctamente.
-- Las animaciones CSS se posicionan mediante SET_SCENE y SEEK. El resultado depende de que la experiencia implemente el adaptador WEBVID_STUDIO_PREVIEW.
-- Las escenas con recursos de terceros deben terminar de cargar antes de exportar.
-- 30 FPS es la cadencia del archivo; la velocidad de render no está garantizada y el procesamiento puede tardar más que la duración del audio.
+- SVG foreignObject varía entre navegadores. Mapas, canvas protegidos por CORS, imágenes remotas, filtros y recursos externos pueden no rasterizarse correctamente.
+- Las animaciones CSS se posicionan mediante SET_SCENE y SEEK. La experiencia debe implementar WEBVID_STUDIO_PREVIEW.
+- 30 FPS es la cadencia del archivo; la velocidad de render no está garantizada.
 - No se afirma compatibilidad validada con Samsung S25 hasta ejecutar una prueba real.
 
 ## Adaptador de escenas
 
-Una experiencia debe admitir el canal WEBVID_STUDIO_PREVIEW cuando se ejecuta con ?studio=1. SET_SCENE selecciona una escena y SEEK posiciona sus animaciones. Las experiencias con mapas o canvas propios pueden requerir un adaptador de render específico.
+Una experiencia debe admitir WEBVID_STUDIO_PREVIEW con ?studio=1. SET_SCENE selecciona una escena y SEEK posiciona sus animaciones. Mapas o canvas propios pueden requerir un adaptador específico.
 
 ## Privacidad
 
-El audio se mantiene en memoria local y no se transmite a GitHub ni a un servidor. El MP4 se genera en el dispositivo.
+El audio se mantiene en memoria local y no se transmite a GitHub ni a un servidor. El MP4 se escribe en almacenamiento local o se descarga al dispositivo.
 
 ## Validación pendiente
 
-- Ejecutar una exportación real y comprobar que el MP4 abre en reproductores externos.
-- Verificar duración, sincronización, dimensiones y ambas pistas.
-- Probar Chrome Android y Samsung Internet en Samsung S25.
-- Validar imágenes remotas, mapas Leaflet, canvas, pseudo-elementos, filtros y animaciones.
-- Medir memoria y tiempo de exportación; estudiar salida progresiva a disco.
+- Exportaciones reales de más de 90 segundos y reproducción del MP4 resultante.
+- Duración, sincronización, dimensiones y pistas de audio/vídeo.
+- Selector de guardado, OPFS y fallback de memoria.
+- Chrome Android y Samsung Internet en Samsung S25.
+- Imágenes remotas, mapas Leaflet, canvas, pseudo-elementos, filtros y animaciones.
+- Memoria, tiempo y almacenamiento disponible.
