@@ -9,7 +9,7 @@ Studio lee el catálogo del PWA, carga la experiencia seleccionada y permite sin
 ## Render directo y almacenamiento
 
 - Salida: 1080 × 1920, MP4 H.264 + AAC a 30 FPS.
-- Se eliminó el límite fijo de duración de 90 segundos.
+- No existe un tope temporal impuesto por la aplicación; la duración efectiva depende de memoria, almacenamiento y compatibilidad del navegador.
 - Mediabunny StreamTarget escribe el MP4 progresivamente, en bloques, a almacenamiento local en lugar de acumular todo el vídeo en un ArrayBuffer.
 - Prioridad: selector de guardado del navegador; OPFS (almacenamiento privado del origen) cuando esté disponible; BufferTarget en memoria como último recurso.
 - En navegadores sin almacenamiento progresivo, exportaciones largas pueden consumir mucha memoria. No se garantiza duración ilimitada.
