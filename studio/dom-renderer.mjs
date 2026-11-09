@@ -36,7 +36,7 @@ function copyComputedStyles(source, target, pseudoNodes = true) {
 }
 
 async function inlineCanvas(source, target) {
-  if (source instanceof HTMLCanvasElement) {
+  if (source.localName === "canvas") {
     try {
       const image = source.ownerDocument.createElement("img");
       image.src = source.toDataURL("image/png");
@@ -60,15 +60,15 @@ async function cloneWithStyles(source, target) {
   const sourceChildren = [...source.childNodes];
   const targetChildren = [...target.childNodes];
   copyComputedStyles(source, target);
-  if (source instanceof HTMLCanvasElement) {
+  if (source.localName === "canvas") {
     await inlineCanvas(source, target);
     return;
   }
-  if (source instanceof HTMLInputElement) target.setAttribute("value", source.value);
-  if (source instanceof HTMLTextAreaElement) target.textContent = source.value;
-  if (source instanceof HTMLSelectElement) target.setAttribute("data-value", source.value);
+  if (source.localName === "input") target.setAttribute("value", source.value);
+  if (source.localName === "textarea") target.textContent = source.value;
+  if (source.localName === "select") target.setAttribute("data-value", source.value);
 
-  if (source instanceof HTMLImageElement) {
+  if (source.localName === "img") {
     if (!source.complete || !source.naturalWidth) {
       try {
         await Promise.race([
