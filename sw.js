@@ -1,4 +1,4 @@
-const VERSION = "v7";
+const VERSION = "v8";
 const SHELL_CACHE = "webvid-shell-" + VERSION;
 const RUNTIME_CACHE = "webvid-runtime-" + VERSION;
 const MAX_RUNTIME_ENTRIES = 120;
@@ -120,7 +120,8 @@ async function networkFirst(request, cacheName, fallbackUrl = null) {
   const key = normalizedRequest(request);
   const cache = await caches.open(cacheName);
   try {
-    const response = await fetch(request);
+    const freshRequest = new Request(request, { cache: "no-store" });
+    const response = await fetch(freshRequest);
     if (response.ok) {
       if (cacheName === RUNTIME_CACHE) await cacheRuntimeResponse(key, response.clone());
       else await cache.put(key, response.clone());
@@ -293,6 +294,12 @@ self.addEventListener("fetch", event => {
     const cacheName = isShellDocument || isCatalog ? SHELL_CACHE : RUNTIME_CACHE;
     const fallback = isNavigation && url.pathname === APP_ROOT ? new URL("./", APP_SCOPE).href : null;
     event.respondWith(networkFirst(request, cacheName, fallback));
+    return;
+  }
+
+  const isStudioAsset = url.pathname.startsWith(APP_ROOT + "studio/") && /\\.(?:mjs|js|css)$/.test(url.pathname);
+  if (isStudioAsset) {
+    event.respondWith(networkFirst(request, SHELL_CACHE));
     return;
   }
 
