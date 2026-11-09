@@ -1,11 +1,12 @@
-const VERSION = "v4";
-const SHELL_CACHE = `webvid-shell-${VERSION}`;
-const RUNTIME_CACHE = `webvid-runtime-${VERSION}`;
+const VERSION = "v5";
+const SHELL_CACHE = "webvid-shell-" + VERSION;
+const RUNTIME_CACHE = "webvid-runtime-" + VERSION;
 const MAX_RUNTIME_ENTRIES = 120;
 const MAX_RUNTIME_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_CACHEABLE_RESOURCE_BYTES = 80 * 1024 * 1024;
 const APP_SCOPE = new URL(self.registration.scope);
-const APP_ROOT = APP_SCOPE.pathname.endsWith("/") ? APP_SCOPE.pathname : `${APP_SCOPE.pathname}/`;
+const APP_ROOT = APP_SCOPE.pathname.endsWith("/") ? APP_SCOPE.pathname : APP_SCOPE.pathname + "/";
+const MEDIABUNNY_URL = "https://cdn.jsdelivr.net/npm/mediabunny@1.65.2/+esm";
 
 const APP_SHELL = [
   new URL("./", APP_SCOPE).href,
@@ -13,7 +14,15 @@ const APP_SHELL = [
   new URL("manifest.webmanifest", APP_SCOPE).href,
   new URL("icon.svg", APP_SCOPE).href,
   new URL("icon-maskable.svg", APP_SCOPE).href,
-  new URL("experiencias.json", APP_SCOPE).href
+  new URL("experiencias.json", APP_SCOPE).href,
+  new URL("studio/index.html", APP_SCOPE).href,
+  new URL("studio/studio.css", APP_SCOPE).href,
+  new URL("studio/studio.mjs", APP_SCOPE).href,
+  new URL("studio/audio-analyzer.mjs", APP_SCOPE).href,
+  new URL("studio/exporter.mjs", APP_SCOPE).href,
+  new URL("studio/render.html", APP_SCOPE).href,
+  new URL("studio/render.css", APP_SCOPE).href,
+  new URL("studio/render.mjs", APP_SCOPE).href
 ];
 
 function isInScope(url) {
@@ -22,8 +31,8 @@ function isInScope(url) {
 
 function normalizedRequest(request) {
   const url = new URL(request.url);
-  if (url.pathname === APP_ROOT || url.pathname === `${APP_ROOT}index.html` ||
-      url.pathname === `${APP_ROOT}experiencias.json`) {
+  if (url.pathname === APP_ROOT || url.pathname === APP_ROOT + "index.html" ||
+      url.pathname === APP_ROOT + "experiencias.json") {
     url.search = "";
     url.hash = "";
   }
@@ -131,8 +140,15 @@ async function networkFirst(request, cacheName, fallbackUrl = null) {
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(SHELL_CACHE)
-    .then(cache => cache.addAll(APP_SHELL))
-    .then(() => self.skipWaiting()));
+    .then(async cache => {
+      await cache.addAll(APP_SHELL);
+      try {
+        await cache.add(new Request(MEDIABUNNY_URL, { mode: "cors" }));
+      } catch {
+        // Studio can still load; MP4 export will fetch this dependency when online.
+      }
+      await self.skipWaiting();
+    }));
 });
 
 self.addEventListener("activate", event => {
@@ -162,7 +178,7 @@ self.addEventListener("message", event => {
           }
           const request = new Request(url.href, { credentials: "same-origin" });
           const response = await fetch(request);
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          if (!response.ok) throw new Error("HTTP " + response.status);
           const stored = await putWithTimestamp(cache, request, response);
           if (!stored) throw new Error("resource-not-cacheable-or-over-80mb");
           results.push({ url: url.href, ok: true });
@@ -223,13 +239,13 @@ async function handleRangeRequest(request) {
   if (!range) {
     return new Response(null, {
       status: 416,
-      headers: { "Content-Range": `bytes */${size}`, "Accept-Ranges": "bytes" }
+      headers: { "Content-Range": "bytes */" + size, "Accept-Ranges": "bytes" }
     });
   }
   const { start, end } = range;
   const headers = new Headers(cached.headers);
   headers.set("Accept-Ranges", "bytes");
-  headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
+  headers.set("Content-Range", "bytes " + start + "-" + end + "/" + size);
   headers.set("Content-Length", String(end - start + 1));
   return new Response(buffer.slice(start, end + 1), {
     status: 206,
@@ -242,16 +258,35 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (!isInScope(url)) return;
 
+  if (url.href === MEDIABUNNY_URL) {
+    event.respondWith((async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      try {
+        const response = await fetch(request);
+        if (response.ok && response.type !== "opaque") await cache.put(request, response.clone());
+        return response;
+      } catch {
+        return new Response("El motor MP4 no está disponible sin conexión.", {
+          status: 503,
+          headers: { "Content-Type": "text/plain; charset=utf-8" }
+        });
+      }
+    })());
+    return;
+  }
+
+  if (!isInScope(url)) return;
   if (request.headers.has("Range")) {
     event.respondWith(handleRangeRequest(request));
     return;
   }
 
   const isNavigation = request.mode === "navigate";
-  const isCatalog = url.pathname === `${APP_ROOT}experiencias.json`;
-  const isShellDocument = url.pathname === APP_ROOT || url.pathname === `${APP_ROOT}index.html`;
+  const isCatalog = url.pathname === APP_ROOT + "experiencias.json";
+  const isShellDocument = url.pathname === APP_ROOT || url.pathname === APP_ROOT + "index.html";
   if (isNavigation || isCatalog || isShellDocument) {
     const cacheName = isShellDocument || isCatalog ? SHELL_CACHE : RUNTIME_CACHE;
     const fallback = isNavigation && url.pathname === APP_ROOT ? new URL("./", APP_SCOPE).href : null;
