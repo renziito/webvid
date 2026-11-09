@@ -75,6 +75,16 @@ async function inlineCanvas(source, target) {
   }
 }
 
+function isVisibleInDocument(element) {
+  let current = element;
+  while (current && current.nodeType === Node.ELEMENT_NODE) {
+    const style = getComputedStyle(current);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+    current = current.parentElement;
+  }
+  return true;
+}
+
 async function cloneWithStyles(source, target) {
   if (source.nodeType === Node.TEXT_NODE) {
     target.textContent = source.textContent;
@@ -94,6 +104,10 @@ async function cloneWithStyles(source, target) {
   if (source.localName === "select") target.setAttribute("data-value", source.value);
 
   if (source.localName === "img") {
+    if (!isVisibleInDocument(source)) {
+      target.removeAttribute("src");
+      return;
+    }
     if (!source.complete || !source.naturalWidth) {
       try {
         await Promise.race([
