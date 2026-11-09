@@ -57,6 +57,8 @@ async function cloneWithStyles(source, target) {
   }
   if (source.nodeType !== Node.ELEMENT_NODE) return;
 
+  const sourceChildren = [...source.childNodes];
+  const targetChildren = [...target.childNodes];
   copyComputedStyles(source, target);
   if (source instanceof HTMLCanvasElement) {
     await inlineCanvas(source, target);
@@ -81,8 +83,6 @@ async function cloneWithStyles(source, target) {
     target.setAttribute("crossorigin", "anonymous");
   }
 
-  const sourceChildren = [...source.childNodes];
-  const targetChildren = [...target.childNodes];
   for (let i = 0; i < sourceChildren.length; i++) {
     const child = sourceChildren[i];
     const clone = targetChildren[i];
