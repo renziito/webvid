@@ -33,6 +33,7 @@ fileInput.addEventListener("change", () => {
   state.audioUrl = URL.createObjectURL(file);
   state.audioElement?.pause();
   state.audioElement = new Audio(state.audioUrl);
+  state.audioElement.addEventListener("ended", () => { playButton.textContent = "Escuchar"; });
   $("#fileName").textContent = file.name;
   $("#audioMeta").textContent = (file.size / 1024 / 1024).toFixed(1) + " MB · WAV local";
   analyzeButton.disabled = false;
@@ -81,8 +82,6 @@ playButton.addEventListener("click", async () => {
     playButton.textContent = "Escuchar";
   }
 });
-state.audioElement?.addEventListener?.("ended", () => { playButton.textContent = "Escuchar"; });
-
 $("#experience").addEventListener("change", async () => {
   if (!state.analysis) return;
   state.scenes = await getSceneCount($("#experience").value);
