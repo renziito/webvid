@@ -18,7 +18,9 @@ function getRenderFrame() {
   try {
     renderWindow = window.open("", "webvid-studio-render");
     if (!renderWindow || renderWindow.closed) return null;
-    return renderWindow.document.querySelector("#experienceFrame");
+    const frame = renderWindow.document.querySelector("#experienceFrame");
+    if (!frame && renderWindow.location.href === "about:blank") renderWindow.close();
+    return frame;
   } catch {
     return null;
   }
