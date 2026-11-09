@@ -1,6 +1,30 @@
 {
-  "generated_at": "2026-11-09T05:31:58Z",
+  "generated_at": "2026-11-09T05:33:36Z",
   "downloaded": [
+    {
+      "id": "IMG-01",
+      "file": "img-01.jpg",
+      "bytes": 519142,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329402W.jpg"
+    },
+    {
+      "id": "IMG-02",
+      "file": "img-02.jpg",
+      "bytes": 483304,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329423W.jpg"
+    },
+    {
+      "id": "IMG-03",
+      "file": "img-03.jpg",
+      "bytes": 435777,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329395W.jpg"
+    },
+    {
+      "id": "IMG-04",
+      "file": "img-04.jpg",
+      "bytes": 428970,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329396W.jpg"
+    },
     {
       "id": "IMG-05",
       "file": "img-05.webp",
@@ -20,6 +44,12 @@
       "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2019/01/13/000555851W.webp"
     },
     {
+      "id": "IMG-08",
+      "file": "img-08.jpg",
+      "bytes": 345074,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2019/01/14/000556002W.jpg"
+    },
+    {
       "id": "IMG-09",
       "file": "img-09.webp",
       "bytes": 18882,
@@ -36,6 +66,66 @@
       "file": "img-11.webp",
       "bytes": 252322,
       "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2025/01/24/001137540W.webp"
+    },
+    {
+      "id": "IMG-12",
+      "file": "img-12.jpg",
+      "bytes": 554223,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2016/08/07/000369425W.jpg"
+    },
+    {
+      "id": "IMG-13",
+      "file": "img-13.jpg",
+      "bytes": 451781,
+      "source": "https://portal.andina.pe/EDPfotografia2/Thumbnail/2008/02/26/000055292W.jpg"
+    },
+    {
+      "id": "IMG-14",
+      "file": "img-14.jpg",
+      "bytes": 322110,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110035W.jpg"
+    },
+    {
+      "id": "IMG-15",
+      "file": "img-15.jpg",
+      "bytes": 237419,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110032W.jpg"
+    },
+    {
+      "id": "IMG-16",
+      "file": "img-16.jpg",
+      "bytes": 214960,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110038W.jpg"
+    },
+    {
+      "id": "IMG-17",
+      "file": "img-17.jpg",
+      "bytes": 225075,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110036W.jpg"
+    },
+    {
+      "id": "IMG-18",
+      "file": "img-18.jpg",
+      "bytes": 319811,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998438W.jpg"
+    },
+    {
+      "id": "IMG-19",
+      "file": "img-19.jpg",
+      "bytes": 249607,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998435W.jpg"
+    },
+    {
+      "id": "IMG-20",
+      "file": "img-20.jpg",
+      "bytes": 339712,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998517W.jpg"
+    },
+    {
+      "id": "IMG-21",
+      "file": "img-21.jpg",
+      "bytes": 275729,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998436W.jpg"
     },
     {
       "id": "IMG-22",
@@ -84,108 +174,36 @@
       "file": "img-29.webp",
       "bytes": 140974,
       "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069094W.webp"
-    }
-  ],
-  "failed": [
-    {
-      "id": "IMG-01",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329402W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-02",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329423W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-03",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329395W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-04",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329396W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-08",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2019/01/14/000556002W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-12",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2016/08/07/000369425W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-13",
-      "url": "https://portal.andina.pe/EDPfotografia2/Thumbnail/2008/02/26/000055292W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-14",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110035W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-15",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110032W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-16",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110038W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-17",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110036W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-18",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998438W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-19",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998435W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-20",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998517W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
-    },
-    {
-      "id": "IMG-21",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998436W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
     },
     {
       "id": "IMG-30",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110034W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
+      "file": "img-30.jpg",
+      "bytes": 241884,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110034W.jpg"
     },
     {
       "id": "IMG-31",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110037W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
+      "file": "img-31.jpg",
+      "bytes": 255458,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110037W.jpg"
     },
     {
       "id": "IMG-32",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110031W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
+      "file": "img-32.jpg",
+      "bytes": 356494,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110031W.jpg"
     },
     {
       "id": "IMG-33",
-      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110039W.jpg",
-      "error": "contenido no reconocido como imagen (Content-Type: image/jpeg)"
+      "file": "img-33.jpg",
+      "bytes": 360495,
+      "source": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110039W.jpg"
     }
   ],
+  "failed": [],
   "summary": {
     "requested": 33,
-    "downloaded": 14,
-    "failed": 19
+    "downloaded": 33,
+    "failed": 0
   }
 }\n
