@@ -56,6 +56,10 @@ fileInput.addEventListener("change", () => {
     let index = 0;
     for (let i = 1; i < state.cues.length; i++) if (state.audioElement.currentTime >= state.cues[i]) index = i;
     if (index !== state.activeScene) selectScene(index);
+    const segmentStart = state.cues[index] ?? 0;
+    const segmentEnd = state.cues[index + 1] ?? state.analysis?.duration ?? segmentStart + 1;
+    const progress = segmentEnd > segmentStart ? (state.audioElement.currentTime - segmentStart) / (segmentEnd - segmentStart) : 0;
+    sendPreview("SEEK", { progress });
   });
   $("#fileName").textContent = file.name;
   $("#audioMeta").textContent = (file.size / 1024 / 1024).toFixed(1) + " MB · WAV local";
