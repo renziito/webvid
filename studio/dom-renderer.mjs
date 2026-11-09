@@ -35,6 +35,31 @@ function copyComputedStyles(source, target, pseudoNodes = true) {
   }
 }
 
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("No se pudo preparar una imagen para el render."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function inlineImage(source, target) {
+  const imageUrl = source.currentSrc || source.src;
+  if (!imageUrl || imageUrl.startsWith("data:") || imageUrl.startsWith("blob:")) {
+    target.setAttribute("src", imageUrl);
+    return;
+  }
+  try {
+    const response = await fetch(imageUrl, { mode: "cors", credentials: "omit" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const dataUrl = await blobToDataUrl(await response.blob());
+    target.setAttribute("src", dataUrl);
+  } catch {
+    throw new Error("Una imagen externa bloquea el render directo por CORS: " + imageUrl);
+  }
+}
+
 async function inlineCanvas(source, target) {
   if (source.localName === "canvas") {
     try {
@@ -79,8 +104,7 @@ async function cloneWithStyles(source, target) {
         throw new Error("No se puede exportar: una imagen de la experiencia no está cargada.");
       }
     }
-    target.setAttribute("src", source.currentSrc || source.src);
-    target.setAttribute("crossorigin", "anonymous");
+    await inlineImage(source, target);
   }
 
   for (let i = 0; i < sourceChildren.length; i++) {
