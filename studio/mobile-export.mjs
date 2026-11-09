@@ -112,17 +112,19 @@ function download(blob, filename) {
 
 async function handleExport(event) {
   if (active) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
   const file = $("#audioFile")?.files?.[0];
   const iframe = getRenderFrame();
   const sliders = [...document.querySelectorAll("#sceneTimeline input[type=range]")];
-  if (!file || !iframe || !sliders.length) return;
-  if (!iframe.contentDocument?.documentElement) {
+  if (!file || !sliders.length) {
+    $("#exportStatus").textContent = "Importa y analiza el audio antes de exportar.";
+    return;
+  }
+  if (!iframe?.contentDocument?.documentElement) {
     $("#exportStatus").textContent = "Abre el lienzo de render y espera a que cargue la experiencia antes de exportar.";
     return;
   }
-
-  event.preventDefault();
-  event.stopImmediatePropagation();
   active = true;
   const button = $("#export");
   const status = $("#exportStatus");
