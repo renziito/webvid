@@ -1,5 +1,4 @@
 import { analyzeAudio, decodeAudioFile, suggestSceneCues } from "./audio-analyzer.mjs";
-import { downloadBlob, exportMp4 } from "./exporter.mjs";
 
 const $ = selector => document.querySelector(selector);
 const fileInput = $("#audioFile");
@@ -81,7 +80,7 @@ function updateExportAvailability(preserveStatus = false) {
     if (!codecsAvailable) {
       setExportStatus("Este navegador no ofrece WebCodecs. La exportación H.264/AAC MP4 no está disponible aquí.");
     } else if (!state.stage) {
-      setExportStatus("Abre el lienzo de render. Después comparte esa pestaña cuando comience la exportación.");
+      setExportStatus("Abre el lienzo de render y espera a que se conecte. No necesitas compartir pantalla.");
     } else if (!state.audioBuffer) {
       setExportStatus("Importa una pista de audio para preparar el video.");
     } else if (!state.isExporting) {
@@ -439,8 +438,8 @@ openRenderButton.addEventListener("click", () => {
       setExportStatus("El navegador bloqueó la nueva pestaña. Permite ventanas emergentes para WebVid y vuelve a intentarlo.");
       return;
     }
-    setPreview("Lienzo de render abierto. Esperando que comunique su área de captura…");
-    setExportStatus("En el lienzo que se abrió, deja cargar la experiencia. Regresa aquí cuando esté listo.");
+    setPreview("Lienzo de render abierto. Esperando la conexión con la experiencia…");
+    setExportStatus("Deja cargar la experiencia en el lienzo. La exportación se realizará directamente desde su DOM.");
     updateExportAvailability();
   } catch (error) {
     setExportStatus("No se pudo abrir el lienzo: " + error.message);
@@ -453,69 +452,11 @@ renderChannel.addEventListener("message", event => {
   if (data.type === "STAGE_INFO" && data.stage) {
     state.stage = data.stage;
     setPreview("Lienzo de render conectado: " + state.experience.title + ".");
+    setExportStatus("Listo para exportar directamente. No se solicitará captura de pantalla.");
     updateExportAvailability();
   }
 });
 
-exportButton.addEventListener("click", async () => {
-  if (!state.audioBuffer || !state.analysis || !state.stage || state.isExporting) return;
-  if (!navigator.mediaDevices?.getDisplayMedia) {
-    setExportStatus("La captura de pestaña no está disponible en este navegador.");
-    return;
-  }
-
-  state.isExporting = true;
-  exportButton.disabled = true;
-  $("#exportProgress").style.width = "0%";
-  setExportStatus("Selecciona la pestaña «Render · WebVid Studio» en el selector de captura.");
-  renderChannel.postMessage({
-    type: "SYNC",
-    slug: state.experience.slug,
-    index: 0,
-    progress: 0
-  });
-
-  let stream = null;
-  try {
-    const duration = state.analysis.duration;
-    const estimatedBytes = duration * 8_000_000 / 8;
-    if (duration > 90 || estimatedBytes > 90 * 1024 * 1024) {
-      throw new Error("Esta versión limita el render en memoria a 90 segundos. Reduce la duración del audio antes de exportar.");
-    }
-    stream = await navigator.mediaDevices.getDisplayMedia({
-      video: { frameRate: { ideal: 60, max: 60 } },
-      audio: false
-    });
-
-    setExportStatus("Renderizando 1080 × 1920 a 60 FPS. Mantén abierta la pestaña Render.");
-    const blob = await exportMp4({
-      stream,
-      stage: state.stage,
-      audioBuffer: state.audioBuffer,
-      duration,
-      width: 1080,
-      height: 1920,
-      fps: 60,
-      onProgress: progress => {
-        syncAtTime(progress * duration);
-        $("#exportProgress").style.width = Math.round(progress * 100) + "%";
-        setExportStatus("Renderizando y sincronizando escenas… " + Math.round(progress * 100) + "%");
-      }
-    });
-
-    const filename = (state.experience.slug || "webvid-video") + "-" + new Date().toISOString().slice(0, 10) + ".mp4";
-    downloadBlob(blob, filename);
-    setExportStatus("MP4 generado: " + filename + " · " + (blob.size / 1024 / 1024).toFixed(1) + " MB.");
-    $("#exportProgress").style.width = "100%";
-  } catch (error) {
-    setExportStatus(error.message || "No se pudo generar el MP4.");
-    $("#exportProgress").style.width = "0%";
-  } finally {
-    if (stream) stream.getTracks().forEach(track => track.stop());
-    state.isExporting = false;
-    updateExportAvailability(true);
-  }
-});
 
 window.addEventListener("resize", () => {
   if (state.analysis) drawWaveform(state.analysis.waveform);
