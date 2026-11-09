@@ -146,7 +146,7 @@ async function handleExport(event) {
     const audioBuffer=await decodeAudioFile(file), cues=[0,...sliders.slice(1).map(s=>Number(s.value))], duration=audioBuffer.duration;
     status.textContent=destination.kind==="memory"
       ?"Sin almacenamiento progresivo: se usará memoria y las exportaciones largas podrían agotar la RAM."
-      :"Almacenamiento progresivo preparado. Sin límite fijo de 90 segundos.";
+      :"Almacenamiento progresivo preparado. La duración depende de los recursos disponibles del dispositivo.";
     const result=await renderMp4({iframe,audioBuffer,cues,duration,destination,
       onPhase:message=>{status.textContent=message;},onProgress:updateProgress});
     if(result instanceof Blob){
