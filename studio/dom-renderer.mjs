@@ -173,7 +173,12 @@ async function cloneWithStyles(source, target) {
           new Promise((_, reject) => setTimeout(() => reject(new Error("Una imagen no terminó de cargar.")), FRAME_TIMEOUT_MS))
         ]);
       } catch {
-        throw new Error("No se puede exportar: una imagen de la experiencia no está cargada.");
+        const imageUrl = source.currentSrc || source.src;
+        if (imageUrl && /^https?:/.test(imageUrl) && new URL(imageUrl, location.href).origin !== location.origin) {
+          applyImageFallback(target, imageUrl);
+          return;
+        }
+        throw new Error("No se puede exportar: una imagen local de la experiencia no está cargada.");
       }
     }
     await inlineImage(source, target);
