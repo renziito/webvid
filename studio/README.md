@@ -45,3 +45,11 @@ El audio se mantiene en memoria local y no se transmite a GitHub ni a un servido
 - Chrome Android y Samsung Internet en Samsung S25.
 - Imágenes remotas, mapas Leaflet, canvas, pseudo-elementos, filtros y animaciones.
 - Memoria, tiempo y almacenamiento disponible.
+
+
+### Imágenes externas y CORS en la exportación
+
+- Las imágenes remotas que permiten CORS se incrustan como data URLs para que el render SVG/Canvas pueda leerlas.
+- Si el servidor remoto bloquea CORS, la exportación ya no se cancela por esa imagen: se conserva su espacio visual y se usa un fondo neutro.
+- El mensaje final informa cuántas imágenes externas fueron sustituidas. Para conservar la fotografía original, debe usarse un recurso con permisos CORS o un asset local con licencia adecuada.
+- Las URLs externas en propiedades CSS de imagen se eliminan del clon de render para evitar contaminar el canvas.
