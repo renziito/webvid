@@ -65,7 +65,7 @@ function studioExperienceUrl(item) {
   return url.href;
 }
 
-function updateExportAvailability() {
+function updateExportAvailability(preserveStatus = false) {
   const captureAvailable = Boolean(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
   const codecsAvailable = typeof VideoEncoder !== "undefined" && typeof AudioEncoder !== "undefined";
   const ready = Boolean(
@@ -79,16 +79,18 @@ function updateExportAvailability() {
     !state.isExporting
   );
   exportButton.disabled = !ready;
-  if (!captureAvailable) {
-    setExportStatus("Este navegador no permite capturar la pestaña. Abre WebVid Studio en un navegador compatible con captura de pantalla.");
-  } else if (!codecsAvailable) {
-    setExportStatus("Este navegador no ofrece WebCodecs. La exportación H.264/AAC MP4 no está disponible aquí.");
-  } else if (!state.stage) {
-    setExportStatus("Abre el lienzo de render. Después comparte esa pestaña cuando comience la exportación.");
-  } else if (!state.audioBuffer) {
-    setExportStatus("Importa una pista de audio para preparar el video.");
-  } else if (!state.isExporting) {
-    setExportStatus("Listo. Al generar, selecciona la pestaña «Render · WebVid Studio» en el selector del navegador.");
+  if (!preserveStatus) {
+    if (!captureAvailable) {
+      setExportStatus("Este navegador no permite capturar la pestaña. Abre WebVid Studio en un navegador compatible con captura de pantalla.");
+    } else if (!codecsAvailable) {
+      setExportStatus("Este navegador no ofrece WebCodecs. La exportación H.264/AAC MP4 no está disponible aquí.");
+    } else if (!state.stage) {
+      setExportStatus("Abre el lienzo de render. Después comparte esa pestaña cuando comience la exportación.");
+    } else if (!state.audioBuffer) {
+      setExportStatus("Importa una pista de audio para preparar el video.");
+    } else if (!state.isExporting) {
+      setExportStatus("Listo. Al generar, selecciona la pestaña «Render · WebVid Studio» en el selector del navegador.");
+    }
   }
 }
 
@@ -479,15 +481,15 @@ exportButton.addEventListener("click", async () => {
 
   let stream = null;
   try {
-    stream = await navigator.mediaDevices.getDisplayMedia({
-      video: { frameRate: { ideal: 60, max: 60 } },
-      audio: false
-    });
     const duration = state.analysis.duration;
     const estimatedBytes = duration * 8_000_000 / 8;
     if (duration > 90 || estimatedBytes > 90 * 1024 * 1024) {
       throw new Error("Esta versión limita el render en memoria a 90 segundos. Reduce la duración del audio antes de exportar.");
     }
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: { ideal: 60, max: 60 } },
+      audio: false
+    });
 
     setExportStatus("Renderizando 1080 × 1920 a 60 FPS. Mantén abierta la pestaña Render.");
     const blob = await exportMp4({
@@ -515,7 +517,7 @@ exportButton.addEventListener("click", async () => {
   } finally {
     if (stream) stream.getTracks().forEach(track => track.stop());
     state.isExporting = false;
-    updateExportAvailability();
+    updateExportAvailability(true);
   }
 });
 
