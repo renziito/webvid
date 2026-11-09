@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090a0f">
+  <meta name="description" content="Editor local de sincronización cinematográfica WebVid Studio.">
+  <title>WebVid Studio · Editor</title>
+  <link rel="stylesheet" href="./studio.css">
+</head>
+<body>
+  <main class="studio-shell">
+    <header class="topbar">
+      <a class="brand" href="../" aria-label="Volver a WebVid">WEBVID <span>STUDIO</span></a>
+      <span class="local-badge"><i></i> PROCESAMIENTO LOCAL</span>
+    </header>
+    <section class="intro">
+      <p class="eyebrow">POSTPRODUCCIÓN CINEMATOGRÁFICA</p>
+      <h1>El ritmo de<br><em>tu historia.</em></h1>
+      <p class="lede">Sincroniza la narración con tus escenas. Revisa el resultado antes de preparar la exportación.</p>
+    </section>
+    <section class="workspace" aria-label="Proyecto de edición">
+      <div class="panel project-panel">
+        <div class="panel-heading"><span>01 / PROYECTO</span><span class="muted">CONFIGURACIÓN</span></div>
+        <label for="experience">Experiencia</label>
+        <select id="experience">
+          <option value="inside-the-algorithm">Inside the Algorithm</option>
+          <option value="lima-bajo-la-lluvia">Lima bajo la lluvia</option>
+        </select>
+        <label for="audioFile">Narración WAV</label>
+        <label class="file-drop" for="audioFile"><span class="file-symbol">＋</span><strong>Seleccionar archivo WAV</strong><small id="fileName">El audio permanece en este dispositivo</small></label>
+        <input id="audioFile" type="file" accept=".wav,audio/wav,audio/x-wav">
+        <div class="audio-meta" id="audioMeta">Sin archivo de audio</div>
+        <div class="actions">
+          <button id="analyze" class="primary" disabled>Analizar narración</button>
+          <button id="playAudio" class="secondary" disabled>Escuchar</button>
+        </div>
+        <p class="privacy-note">El archivo no se transmite ni se guarda en GitHub. Se procesa en la memoria de esta sesión.</p>
+      </div>
+      <div class="panel timeline-panel">
+        <div class="panel-heading"><span>02 / SINCRONIZACIÓN</span><span class="muted" id="analysisState">ESPERANDO AUDIO</span></div>
+        <div class="wave-wrap"><canvas id="waveform" aria-label="Forma de onda de la narración"></canvas><div class="wave-empty" id="waveEmpty">La forma de onda aparecerá después del análisis</div></div>
+        <div class="timeline-summary"><span id="durationLabel">00:00</span><span id="sceneCount">6 escenas</span></div>
+        <div id="sceneTimeline" class="scene-timeline"></div>
+        <p class="hint">El análisis propone puntos de entrada según pausas y energía de voz. Podrás ajustar cada escena manualmente.</p>
+      </div>
+      <div class="panel preview-panel">
+        <div class="panel-heading"><span>03 / REVISIÓN</span><span class="muted">ANTES DE EXPORTAR</span></div>
+        <div class="preview-frame"><div class="preview-art"><div class="preview-orb"></div><div class="preview-copy">WEBVID<br><em>STUDIO</em><small>PREVISUALIZACIÓN DE PROYECTO</small></div></div></div>
+        <div class="preview-status"><span class="status-dot"></span><span id="previewStatus">Carga un WAV para iniciar la revisión</span></div>
+        <button class="primary export" id="export" disabled>Revisión técnica pendiente</button>
+        <p class="hint">La exportación se habilitará cuando el renderizador MP4 local supere las pruebas de compatibilidad del dispositivo. Nunca se exportará sin tu aprobación.</p>
+      </div>
+    </section>
+    <footer>WEBVID STUDIO <span>·</span> V1.1 <span>·</span> LOCAL FIRST</footer>
+  </main>
+  <script type="module" src="./studio.mjs"></script>
+</body>
+</html>
