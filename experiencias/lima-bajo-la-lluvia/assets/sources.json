@@ -299,6 +299,54 @@
       "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110039W.jpg",
       "provider": "Agencia Andina",
       "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-34",
+      "url": "https://f.rpp-noticias.io/2017/03/16/36598617342769-1682805821745820-8291012127749494238-njpg.jpg",
+      "provider": "RPP Noticias",
+      "credit": "Desborde del río Chillón, Puente Piedra, marzo de 2017."
+    },
+    {
+      "id": "IMG-35",
+      "url": "https://f.rpp-noticias.io/2017/05/10/aniego-403266mp4_403267.png",
+      "provider": "RPP Noticias",
+      "credit": "Aniego en avenida Pista Nueva, mayo de 2017."
+    },
+    {
+      "id": "IMG-36",
+      "url": "https://cloudfront-us-east-1.images.arcpublishing.com/elcomercio/EOOPV2ALJREA5FFU3WZNNGSPQQ.jpg",
+      "provider": "El Comercio",
+      "credit": "Crecida del río Chillón."
+    },
+    {
+      "id": "IMG-37",
+      "url": "https://www.infobae.com/resizer/v2/XT2DJVR5HFHGZM7SYKIQQHEXUQ.jpg?auth=044768b6a619cc14a36d5f6b8126cf6fb2cb7d8e75e09a58777f62d6a4e209a6&height=675&quality=85&smart=true&width=1200",
+      "provider": "Infobae",
+      "credit": "Crecida del río Rímac, febrero de 2025."
+    },
+    {
+      "id": "IMG-38",
+      "url": "https://larepublica.cronosmedia.glr.pe/original/2022/05/26/628f87335f20941da00ab5fd.jpg",
+      "provider": "La República",
+      "credit": "Mochila de emergencia."
+    },
+    {
+      "id": "IMG-39",
+      "url": "https://gestion.pe/resizer/v2/5H2Q3WOFDJFWTCGJUHOQCPCORE.jpg?auth=6f966f0262cbfc1e21de526765e2861783161a2c5197e8f14612365c463f0931&height=960&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Artículos de mochila de emergencia."
+    },
+    {
+      "id": "IMG-40",
+      "url": "https://gestion.pe/resizer/v2/L7Y3Y3NOTREPTOLYGQKCBLGEJM.jpg?auth=bd1413969585d1f099914f01025eb5eb3e28927dd44279d8ed29f81a38e642dd&height=309&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Artículos para mochila de emergencia."
+    },
+    {
+      "id": "IMG-41",
+      "url": "https://gestion.pe/resizer/v2/5DXNORNVBZA6TIZOC6VZNX3RG4.jpg?auth=95089a62b2aed1cc06a9c613da1e46a8f3845556be85e527a7d0922656bb4f99&height=874&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Caja de reserva de emergencia."
     }
   ],
   "notes": "Las URL originales de cada imagen se registran individualmente. El crédito del fotógrafo/agencia se conserva según alt/title de la escena. La autorización de reutilización fue declarada por el usuario; comprobar términos individuales y conservar atribución. Las cifras de riesgo se atribuyen al estudio de CENEPRED citado por La República."
