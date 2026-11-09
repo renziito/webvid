@@ -108,7 +108,11 @@ async function renderMp4({ iframe, audioBuffer, cues, duration, destination, onP
         const startFrame = chunkIndex * chunkFrames;
         const endFrame = Math.min(audioBuffer.length, startFrame + chunkFrames);
         onPhase("Codificando audio · bloque " + (chunkIndex + 1) + "/" + totalChunks + "…");
-        await withTimeout(\n          audio.add(createAudioChunk(audioBuffer, startFrame, endFrame, audioContext)),\n          30_000,\n          "La codificación de audio no respondió durante 30 segundos en el bloque " + (chunkIndex + 1) + "/" + totalChunks + ". Reduce la duración o vuelve a intentar la exportación."\n        );
+        await withTimeout(
+          audio.add(createAudioChunk(audioBuffer, startFrame, endFrame, audioContext)),
+          30_000,
+          "La codificación de audio no respondió durante 30 segundos en el bloque " + (chunkIndex + 1) + "/" + totalChunks + ". Reduce la duración o vuelve a intentar la exportación."
+        );
         onProgress({ phase:"audio", fraction:(chunkIndex + 1) / totalChunks, chunk:chunkIndex + 1, totalChunks });
         await wait(0);
       }
