@@ -33,7 +33,10 @@ jobs:
           node --check scripts/validate-catalog.mjs
           node --check studio/studio.mjs
           node --check studio/audio-analyzer.mjs
+          node --check studio/exporter.mjs
+          node --check studio/render.mjs
           node --check experiencias/inside-the-algorithm/script.js
+          node --check experiencias/lima-bajo-la-lluvia/script.js
           node --check engine/scene-engine.mjs
           node --check engine/virtual-camera-engine.mjs
           node --check engine/gesture-controller.mjs
@@ -49,7 +52,7 @@ jobs:
       - name: Assemble public site artifact
         run: |
           set -euo pipefail
-          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs; do
+          for file in index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs studio/index.html studio/studio.css studio/studio.mjs studio/audio-analyzer.mjs studio/exporter.mjs studio/render.html studio/render.css studio/render.mjs; do
             test -f "$file"
           done
 
@@ -57,7 +60,7 @@ jobs:
           mkdir -p dist/experiencias dist/engine dist/studio
           cp index.html manifest.webmanifest sw.js icon.svg icon-maskable.svg experiencias.json dist/
           cp engine/scene-engine.mjs engine/virtual-camera-engine.mjs engine/gesture-controller.mjs engine/scene-player.mjs engine/scene-player.css engine/transition-engine.mjs dist/engine/
-          cp studio/index.html studio/studio.css studio/studio.mjs studio/audio-analyzer.mjs dist/studio/
+          cp studio/index.html studio/studio.css studio/studio.mjs studio/audio-analyzer.mjs studio/exporter.mjs studio/render.html studio/render.css studio/render.mjs dist/studio/
 
           if [ -d experiencias ]; then
             cp -R experiencias/. dist/experiencias/
