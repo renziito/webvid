@@ -30,3 +30,8 @@ footer{border-top:1px solid var(--line);padding-top:18px;margin-top:30px;color:#
 @media(max-width:850px){.workspace{grid-template-columns:1fr 1fr}.preview-panel{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:18px}.preview-panel .panel-heading{grid-column:1/-1}.preview-frame{grid-row:2/5;width:min(100%,155px)}.preview-status,.preview-panel .export,.preview-panel .hint{grid-column:2}}
 @media(max-width:560px){.studio-shell{width:min(100% - 28px,480px);padding-top:calc(18px + env(safe-area-inset-top))}.intro{padding:34px 0 25px}.workspace{grid-template-columns:1fr}.preview-panel{grid-column:auto;display:block}.preview-frame{width:min(62%,190px)}.preview-panel .panel-heading{display:flex}.preview-status,.preview-panel .export,.preview-panel .hint{grid-column:auto}.panel{padding:16px}.local-badge{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.preview-frame{overflow:hidden;padding:0;position:relative}
+.preview-frame iframe{display:block;width:100%;height:100%;border:0;background:#050509}
+.scene-row.active{border-color:#c9a87588;background:#c9a87512}
+.scene-select{border:0;background:none;padding:0;text-align:left;color:#c9a875;font:9px ui-monospace,SFMono-Regular,monospace;cursor:pointer}
