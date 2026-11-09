@@ -50,6 +50,8 @@ async function inlineImage(source, target) {
     target.setAttribute("src", imageUrl);
     return;
   }
+  target.removeAttribute("srcset");
+  target.removeAttribute("sizes");
   try {
     const response = await fetch(imageUrl, { mode: "cors", credentials: "omit" });
     if (!response.ok) throw new Error("HTTP " + response.status);
