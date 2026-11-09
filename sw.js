@@ -1,4 +1,4 @@
-const VERSION = "v5";
+const VERSION = "v6";
 const SHELL_CACHE = "webvid-shell-" + VERSION;
 const RUNTIME_CACHE = "webvid-runtime-" + VERSION;
 const MAX_RUNTIME_ENTRIES = 120;
@@ -18,6 +18,8 @@ const APP_SHELL = [
   new URL("studio/index.html", APP_SCOPE).href,
   new URL("studio/studio.css", APP_SCOPE).href,
   new URL("studio/studio.mjs", APP_SCOPE).href,
+  new URL("studio/mobile-export.mjs", APP_SCOPE).href,
+  new URL("studio/dom-renderer.mjs", APP_SCOPE).href,
   new URL("studio/audio-analyzer.mjs", APP_SCOPE).href,
   new URL("studio/exporter.mjs", APP_SCOPE).href,
   new URL("studio/render.html", APP_SCOPE).href,
