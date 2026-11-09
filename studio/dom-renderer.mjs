@@ -1,4 +1,5 @@
 const FRAME_TIMEOUT_MS = 12000;
+const inlineImageCache = new Map();
 
 function nextFrame(win) {
   return new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
@@ -53,10 +54,17 @@ async function inlineImage(source, target) {
   target.removeAttribute("srcset");
   target.removeAttribute("sizes");
   try {
-    const response = await fetch(imageUrl, { mode: "cors", credentials: "omit" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
-    const dataUrl = await blobToDataUrl(await response.blob());
-    target.setAttribute("src", dataUrl);
+    let dataUrlPromise = inlineImageCache.get(imageUrl);
+    if (!dataUrlPromise) {
+      dataUrlPromise = (async () => {
+        const response = await fetch(imageUrl, { mode: "cors", credentials: "omit" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return blobToDataUrl(await response.blob());
+      })();
+      inlineImageCache.set(imageUrl, dataUrlPromise);
+      dataUrlPromise.catch(() => inlineImageCache.delete(imageUrl));
+    }
+    target.setAttribute("src", await dataUrlPromise);
   } catch {
     throw new Error("Una imagen externa bloquea el render directo por CORS: " + imageUrl);
   }

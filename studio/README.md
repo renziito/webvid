@@ -13,7 +13,9 @@ Studio lee el catálogo del PWA, carga la experiencia seleccionada y permite sin
 - Mediabunny StreamTarget escribe el MP4 progresivamente, en bloques, a almacenamiento local en lugar de acumular todo el vídeo en un ArrayBuffer.
 - Prioridad: selector de guardado del navegador; OPFS (almacenamiento privado del origen) cuando esté disponible; BufferTarget en memoria como último recurso.
 - En navegadores sin almacenamiento progresivo, exportaciones largas pueden consumir mucha memoria. No se garantiza duración ilimitada.
-- El audio se decodifica a AudioBuffer antes de codificarse; pistas largas también consumen memoria.
+- El audio se decodifica a AudioBuffer y se codifica en bloques de cuatro segundos para mostrar progreso y reducir picos de trabajo del codificador; el AudioBuffer completo sigue ocupando memoria.
+- Las imágenes remotas ya convertidas a data URL se reutilizan entre fotogramas para evitar descargarlas y convertirlas repetidamente.
+- La exportación verifica que se hayan renderizado fotogramas y escrito datos MP4 suficientes; rechaza archivos vacíos o incompletos.
 - El progreso muestra frames, escena, tiempo transcurrido y una estimación restante basada en la velocidad observada.
 - La finalización y escritura de metadatos MP4 es una fase separada; su duración no puede predecirse con precisión.
 - El almacenamiento progresivo reduce el crecimiento de RAM del archivo de salida, pero requiere espacio libre en el dispositivo.
@@ -37,7 +39,7 @@ El audio se mantiene en memoria local y no se transmite a GitHub ni a un servido
 
 ## Validación pendiente
 
-- Exportaciones reales de más de 90 segundos y reproducción del MP4 resultante.
+- Exportaciones reales de 78 segundos y de más de 90 segundos, y reproducción del MP4 resultante.
 - Duración, sincronización, dimensiones y pistas de audio/vídeo.
 - Selector de guardado, OPFS y fallback de memoria.
 - Chrome Android y Samsung Internet en Samsung S25.
