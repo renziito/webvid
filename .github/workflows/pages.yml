@@ -64,6 +64,10 @@ jobs:
             echo "Unexpected documentation file in public artifact."
             exit 1
           fi
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
   deploy:
     name: Deploy production site
     if: github.ref == 'refs/heads/main'
