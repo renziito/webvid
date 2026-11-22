@@ -4,7 +4,7 @@ const scenes=[...document.querySelectorAll(".scene")];
 if(!scenes.length)return;
 let index=Math.max(0,scenes.findIndex(s=>s.classList.contains("active")));
 let timer=0,locked=false,touch=null;
-const STEP_MS=4500,FADE_MS=580;
+const STEP_MS=3900,FADE_MS=580;
 function clear(){if(timer){clearTimeout(timer);timer=0;}}
 function videos(){scenes.forEach((s,i)=>{const v=s.querySelector("video");if(!v)return;if(i===index){v.play().catch(()=>{});}else{v.pause();try{v.currentTime=0;}catch(_){}}});}
 function schedule(){clear();timer=setTimeout(()=>go(index+1,true),STEP_MS);}
