@@ -1,28 +1,54 @@
 (()=>{
 "use strict";
-const scenes=[...document.querySelectorAll(".scene")];
+const scenes=Array.from(document.querySelectorAll("#film .scene"));
 if(!scenes.length)return;
-let index=Math.max(0,scenes.findIndex(s=>s.classList.contains("active")));
-let timer=0,locked=false,touch=null;
-const STEP_MS=3900,FADE_MS=580;
-function clear(){if(timer){clearTimeout(timer);timer=0;}}
-function videos(){scenes.forEach((s,i)=>{const v=s.querySelector("video");if(!v)return;if(i===index){v.play().catch(()=>{});}else{v.pause();try{v.currentTime=0;}catch(_){}}});}
-function schedule(){clear();timer=setTimeout(()=>go(index+1,true),STEP_MS);}
-function go(next,automatic=false){
-if(locked)return;
-if(next>=scenes.length)next=0;
-if(next<0)next=scenes.length-1;
-if(next===index){if(!automatic)schedule();return;}
-locked=true;clear();
-scenes[index].classList.remove("active");
-index=next;scenes[index].classList.add("active");videos();
-setTimeout(()=>{locked=false;schedule();},FADE_MS);
+const STEP_MS=3200;
+let index=Math.max(0,scenes.findIndex(scene=>scene.classList.contains("active")));
+let timer=null,deadline=0,remaining=STEP_MS,pointerStart=null;
+scenes.forEach((scene,i)=>scene.classList.toggle("active",i===index));
+function stopClock(){
+  if(timer!==null){clearTimeout(timer);timer=null;}
+  if(deadline)remaining=Math.max(0,deadline-Date.now());
+  deadline=0;
 }
-function start(e){const p=e.changedTouches?e.changedTouches[0]:e;touch={x:p.clientX,y:p.clientY};}
-function end(e){if(!touch)return;const p=e.changedTouches?e.changedTouches[0]:e;const dx=p.clientX-touch.x,dy=p.clientY-touch.y;touch=null;if(Math.abs(dy)>42&&Math.abs(dy)>Math.abs(dx)*1.15)go(index+(dy<0?1:-1));}
-window.addEventListener("touchstart",start,{passive:true});
-window.addEventListener("touchend",end,{passive:true});
-window.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key==="PageDown"){e.preventDefault();go(index+1);}else if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();go(index-1);}});
-document.addEventListener("visibilitychange",()=>{if(document.hidden)clear();else schedule();});
-videos();schedule();
+function syncVideos(){
+  scenes.forEach((scene,i)=>{
+    const video=scene.querySelector("video");
+    if(!video)return;
+    if(i===index){const result=video.play();if(result&&result.catch)result.catch(()=>{});}
+    else{video.pause();try{video.currentTime=0;}catch(error){}}
+  });
+}
+function schedule(delay=STEP_MS){
+  if(document.hidden)return;
+  if(timer!==null)clearTimeout(timer);
+  remaining=Math.max(0,delay);deadline=Date.now()+remaining;
+  timer=setTimeout(()=>{timer=null;deadline=0;remaining=STEP_MS;show(index+1);},remaining);
+}
+function show(next){
+  stopClock();
+  index=(next+scenes.length)%scenes.length;
+  scenes.forEach((scene,i)=>scene.classList.toggle("active",i===index));
+  syncVideos();remaining=STEP_MS;schedule(STEP_MS);
+}
+const film=document.getElementById("film");
+film.addEventListener("pointerdown",event=>{
+  if(event.pointerType==="mouse"&&event.button!==0)return;
+  pointerStart={x:event.clientX,y:event.clientY};
+},{passive:true});
+film.addEventListener("pointerup",event=>{
+  if(!pointerStart)return;
+  const dx=event.clientX-pointerStart.x,dy=event.clientY-pointerStart.y;pointerStart=null;
+  if(Math.abs(dy)>45&&Math.abs(dy)>Math.abs(dx)*1.15)show(index+(dy<0?1:-1));
+},{passive:true});
+film.addEventListener("pointercancel",()=>{pointerStart=null;},{passive:true});
+window.addEventListener("keydown",event=>{
+  if(event.key==="ArrowDown"||event.key==="PageDown"){event.preventDefault();show(index+1);}
+  else if(event.key==="ArrowUp"||event.key==="PageUp"){event.preventDefault();show(index-1);}
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){stopClock();scenes.forEach(scene=>{const video=scene.querySelector("video");if(video)video.pause();});}
+  else{syncVideos();schedule(remaining||STEP_MS);}
+});
+syncVideos();schedule(STEP_MS);
 })();
