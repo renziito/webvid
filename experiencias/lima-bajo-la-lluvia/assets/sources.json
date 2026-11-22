@@ -1,0 +1,353 @@
+{
+  "title": "Lima bajo la lluvia — fuentes y créditos",
+  "updated_at": "2026-11-09",
+  "research": [
+    {
+      "id": "SRC-01",
+      "name": "ENFEN — Comunicado Oficial N.° 19-2026",
+      "url": "https://enfen.imarpe.gob.pe/download/comunicado-oficial-enfen-n-19-2026/",
+      "use": "Perspectiva de lluvias y caudales nov. 2026–ene. 2027; cuencas Chillón, Rímac y Lurín."
+    },
+    {
+      "id": "SRC-02",
+      "name": "CENEPRED — escenario de riesgo 2026–2027 (referenciado por La República)",
+      "url": "https://larepublica.pe/sociedad/2026/11/04/san-juan-de-lurigancho-lidera-la-lista-de-distritos-en-riesgo-muy-alto-por-inundaciones-ante-el-nino-segun-cenepred-comas-y-chorrillos-tambien-figuran-entre-los-mas-expuestos-135168",
+      "use": "Población expuesta a riesgo muy alto por distrito."
+    },
+    {
+      "id": "SRC-03",
+      "name": "El Comercio — Lima Sur bajo el agua (07.11.2026)",
+      "url": "https://elcomercio.pe/lima/lima-sur-bajo-el-agua-por-que-las-lluvias-se-concentran-en-esta-zona-y-no-en-el-norte-y-como-se-explican-los-65-puntos-de-inundacion-apuesplan-noticia/",
+      "use": "119,8 mm acumulados 2026; 20,6 mm promedio anual 2018–2025; 11,7 mm/24 h; 65 puntos reportados."
+    },
+    {
+      "id": "SRC-04",
+      "name": "RPP — registro de precipitación en Villa María (05.11.2026)",
+      "url": "https://rpp.pe/lima/actualidad/lluvia-record-en-lima-senamhi-registro-historicos-117-mm-de-acumulado-de-precipitacion-en-villa-maria-del-triunfo-noticia-1716052",
+      "use": "Registro de precipitación de la estación Villa María."
+    },
+    {
+      "id": "SRC-05",
+      "name": "COEN–INDECI — Reporte Complementario N.° 15558 (06.11.2026)",
+      "url": "https://portal.indeci.gob.pe/emergencias/reporte-complementario-n-o-15466-4-11-2026-coen-indeci-1330-horas-reporte-n-1-inundacion-por-saturacion-del-suelo-para-drenaje-pluvial-en-el-distrito-de-villa-maria-del-triunfo-l/",
+      "use": "Inundación por saturación del suelo en Villa María del Triunfo."
+    },
+    {
+      "id": "SRC-06",
+      "name": "INDECI — Preparados ante lluvias intensas",
+      "url": "https://www.gob.pe/institucion/indeci/campa%C3%B1as/6555-preparados-ante-lluvias-intensas",
+      "use": "Preparación, evacuación y red de apoyo."
+    },
+    {
+      "id": "SRC-07",
+      "name": "INDECI — Plan Familiar de Emergencia",
+      "url": "https://www.gob.pe/10165-plan-familiar-de-emergencia",
+      "use": "Plan familiar, rutas y puntos seguros."
+    },
+    {
+      "id": "SRC-08",
+      "name": "El Comercio — aniegos y colapso de alcantarillado en VES",
+      "url": "https://elcomercio.pe/lima/villa-el-salvador-aniegos-y-colapso-de-alcantarillado-tras-garua-nocturna-lluvias-apuesplan-ultimas-noticia/?outputType=amp",
+      "use": "Contexto de los aniegos y afectación de alcantarillado."
+    }
+  ],
+  "visual_sources": [
+    {
+      "id": "VIS-01",
+      "name": "Agencia Andina",
+      "url": "https://andina.pe/",
+      "credit": "Juan Carlos Guzmán, Luis Iparraguirre, Percy Buendía, Daniel Bracamonte, Eddy Ramos y Lino Chipana, según créditos individuales del HTML."
+    },
+    {
+      "id": "VIS-02",
+      "name": "RPP Noticias",
+      "url": "https://rpp.pe/",
+      "credit": "Fotografías y capturas de archivo, según alt/title."
+    },
+    {
+      "id": "VIS-03",
+      "name": "El Comercio",
+      "url": "https://elcomercio.pe/",
+      "credit": "Fotografías de archivo y fotoperiodismo."
+    },
+    {
+      "id": "VIS-04",
+      "name": "Infobae",
+      "url": "https://www.infobae.com/",
+      "credit": "Fotografía de la crecida del río Rímac."
+    },
+    {
+      "id": "VIS-05",
+      "name": "La República",
+      "url": "https://larepublica.pe/",
+      "credit": "Fotografía de mochila de emergencia."
+    },
+    {
+      "id": "VIS-06",
+      "name": "Gestión",
+      "url": "https://gestion.pe/",
+      "credit": "Fotografías de mochila y caja de reserva."
+    },
+    {
+      "id": "VIS-07",
+      "name": "OpenStreetMap",
+      "url": "https://www.openstreetmap.org/copyright",
+      "credit": "Cartografía y teselas; © OpenStreetMap contributors."
+    },
+    {
+      "id": "VIS-08",
+      "name": "Leaflet",
+      "url": "https://leafletjs.com/",
+      "credit": "Biblioteca de mapas Leaflet 1.9.4."
+    }
+  ],
+  "image_assets": [
+    {
+      "id": "IMG-01",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329402W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-02",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329423W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-03",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329395W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-04",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2026/11/05/001329396W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-05",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2025/04/03/001158103W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-06",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2025/04/03/001158108W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-07",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2019/01/13/000555851W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-08",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2019/01/14/000556002W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-09",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2017/03/16/000409889M.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-10",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2025/01/24/001137553W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-11",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2025/01/24/001137540W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-12",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2016/08/07/000369425W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-13",
+      "url": "https://portal.andina.pe/EDPfotografia2/Thumbnail/2008/02/26/000055292W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-14",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110035W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-15",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110032W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-16",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110038W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-17",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110036W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-18",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998438W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-19",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998435W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-20",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998517W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-21",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2023/09/27/000998436W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-22",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069111W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-23",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069099W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-24",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069103W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-25",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069104W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-26",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069106W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-27",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069109W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-28",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069097W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-29",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/05/31/001069094W.webp",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-30",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110034W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-31",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110037W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-32",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110031W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-33",
+      "url": "https://portal.andina.pe/EDPfotografia3/Thumbnail/2024/10/21/001110039W.jpg",
+      "provider": "Agencia Andina",
+      "credit": "Conservar crédito de fotógrafo/agencia indicado en alt/title del HTML original."
+    },
+    {
+      "id": "IMG-34",
+      "url": "https://f.rpp-noticias.io/2017/03/16/36598617342769-1682805821745820-8291012127749494238-njpg.jpg",
+      "provider": "RPP Noticias",
+      "credit": "Desborde del río Chillón, Puente Piedra, marzo de 2017."
+    },
+    {
+      "id": "IMG-35",
+      "url": "https://f.rpp-noticias.io/2017/05/10/aniego-403266mp4_403267.png",
+      "provider": "RPP Noticias",
+      "credit": "Aniego en avenida Pista Nueva, mayo de 2017."
+    },
+    {
+      "id": "IMG-36",
+      "url": "https://cloudfront-us-east-1.images.arcpublishing.com/elcomercio/EOOPV2ALJREA5FFU3WZNNGSPQQ.jpg",
+      "provider": "El Comercio",
+      "credit": "Crecida del río Chillón."
+    },
+    {
+      "id": "IMG-37",
+      "url": "https://www.infobae.com/resizer/v2/XT2DJVR5HFHGZM7SYKIQQHEXUQ.jpg?auth=044768b6a619cc14a36d5f6b8126cf6fb2cb7d8e75e09a58777f62d6a4e209a6&height=675&quality=85&smart=true&width=1200",
+      "provider": "Infobae",
+      "credit": "Crecida del río Rímac, febrero de 2025."
+    },
+    {
+      "id": "IMG-38",
+      "url": "https://larepublica.cronosmedia.glr.pe/original/2022/05/26/628f87335f20941da00ab5fd.jpg",
+      "provider": "La República",
+      "credit": "Mochila de emergencia."
+    },
+    {
+      "id": "IMG-39",
+      "url": "https://gestion.pe/resizer/v2/5H2Q3WOFDJFWTCGJUHOQCPCORE.jpg?auth=6f966f0262cbfc1e21de526765e2861783161a2c5197e8f14612365c463f0931&height=960&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Artículos de mochila de emergencia."
+    },
+    {
+      "id": "IMG-40",
+      "url": "https://gestion.pe/resizer/v2/L7Y3Y3NOTREPTOLYGQKCBLGEJM.jpg?auth=bd1413969585d1f099914f01025eb5eb3e28927dd44279d8ed29f81a38e642dd&height=309&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Artículos para mochila de emergencia."
+    },
+    {
+      "id": "IMG-41",
+      "url": "https://gestion.pe/resizer/v2/5DXNORNVBZA6TIZOC6VZNX3RG4.jpg?auth=95089a62b2aed1cc06a9c613da1e46a8f3845556be85e527a7d0922656bb4f99&height=874&quality=75&smart=true&width=1200",
+      "provider": "Gestión",
+      "credit": "Caja de reserva de emergencia."
+    }
+  ],
+  "notes": "Las URL originales de cada imagen se registran individualmente. El crédito del fotógrafo/agencia se conserva según alt/title de la escena. La autorización de reutilización fue declarada por el usuario; comprobar términos individuales y conservar atribución. Las cifras de riesgo se atribuyen al estudio de CENEPRED citado por La República."
+}

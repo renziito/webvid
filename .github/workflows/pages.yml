@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,6 +21,111 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: true
+
+      - name: Download and verify Lima photo assets
+        if: github.ref == 'refs/heads/feature/lima-lluvia-final-sources'
+        run: |
+          python - <<'PY'
+          import json
+          import mimetypes
+          import pathlib
+          import time
+          import urllib.error
+          import urllib.request
+
+          manifest = pathlib.Path("experiencias/lima-bajo-la-lluvia/assets/sources.json")
+          assets_dir = manifest.parent
+          assets_dir.mkdir(parents=True, exist_ok=True)
+          data = json.loads(manifest.read_text(encoding="utf-8"))
+          successes, failures = [], []
+
+          signatures = {
+              bytes.fromhex("ffd8ff"): ".jpg",
+              bytes.fromhex("89504e470d0a1a0a"): ".png",
+              b"GIF87a": ".gif",
+              b"GIF89a": ".gif",
+              b"RIFF": ".webp",
+          }
+          # AVIF es un contenedor ISO-BMFF: ftyp + marca avif/avis.
+          def detected_extension(payload, content_type):
+              for signature, ext in signatures.items():
+                  if payload.startswith(signature):
+                      if signature == b"RIFF" and payload[8:12] != b"WEBP":
+                          continue
+                      return ext
+              if len(payload) >= 12 and payload[4:8] == b"ftyp" and payload[8:12] in (b"avif", b"avis"):
+                  return ".avif"
+              if content_type == "image/avif":
+                  raise ValueError("Content-Type image/avif pero firma AVIF inválida")
+              return None
+
+          for item in data.get("image_assets", []):
+              asset_id = item["id"]
+              url = item["url"]
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      "User-Agent": "Mozilla/5.0 (compatible; WebVidAssetFetcher/1.0)",
+                      "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+                  },
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=35) as response:
+                      payload = response.read(15 * 1024 * 1024 + 1)
+                      content_type = response.headers.get("Content-Type", "").split(";")[0].lower()
+                  if len(payload) < 512:
+                      raise ValueError(f"respuesta demasiado pequeña: {len(payload)} bytes")
+                  if len(payload) > 15 * 1024 * 1024:
+                      raise ValueError("supera el límite de 15 MB")
+                  extension = detected_extension(payload, content_type)
+                  if not extension:
+                      raise ValueError(f"contenido no reconocido como imagen (Content-Type: {content_type})")
+                  filename = f"{asset_id.lower()}{extension}"
+                  target = assets_dir / filename
+                  target.write_bytes(payload)
+                  successes.append({
+                      "id": asset_id,
+                      "file": filename,
+                      "bytes": len(payload),
+                      "source": url,
+                  })
+                  print(f"OK {asset_id}: {filename} ({len(payload)} bytes)")
+              except Exception as exc:
+                  failures.append({"id": asset_id, "url": url, "error": str(exc)})
+                  print(f"ERROR {asset_id}: {exc}")
+              time.sleep(0.25)
+
+          report = {
+              "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "downloaded": successes,
+              "failed": failures,
+              "summary": {"requested": len(data.get("image_assets", [])),
+                          "downloaded": len(successes), "failed": len(failures)},
+          }
+          (assets_dir / "download-report.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2) + "\\n",
+              encoding="utf-8",
+          )
+          print(f"Resumen: {len(successes)} descargadas; {len(failures)} fallidas.")
+          if not successes:
+              raise SystemExit("No se pudo descargar ninguna imagen; no se crearán assets vacíos.")
+          PY
+
+      - name: Commit downloaded assets to review branch
+        if: github.ref == 'refs/heads/feature/lima-lluvia-final-sources'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add experiencias/lima-bajo-la-lluvia/assets/
+          if git diff --cached --quiet; then
+            echo "No hay assets nuevos que guardar."
+          else
+            git commit -m "assets(lima-bajo-la-lluvia): download and verify source photos"
+            git push origin HEAD:feature/lima-lluvia-final-sources
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
