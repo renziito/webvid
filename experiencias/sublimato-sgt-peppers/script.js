@@ -1,66 +1,28 @@
-(() => {
-  "use strict";
-  const scenes = Array.from(document.querySelectorAll(".scene"));
-  if (!scenes.length) return;
-  let current = Math.max(0, scenes.findIndex(scene => scene.classList.contains("active")));
-  let timerId = 0;
-  let transitionLocked = false;
-  let touchStart = null;
-  const TRANSITION_MS = 900;
-  function pauseAllVideos() {
-    scenes.forEach(scene => {
-      const video = scene.querySelector("video");
-      if (video) { video.pause(); video.currentTime = 0; }
-    });
-  }
-  function playCurrentVideo() {
-    const video = scenes[current].querySelector("video");
-    if (!video) return;
-    const play = video.play();
-    if (play && typeof play.catch === "function") play.catch(() => {});
-  }
-  function durationFor(scene) {
-    const fixed = Number(scene.dataset.duration);
-    const text = scene.querySelector(".copy")?.innerText || "";
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
-    const readingTime = 6500 + words * 430;
-    return Math.max(Number.isFinite(fixed) && fixed > 0 ? fixed : 0, readingTime, 14000);
-  }
-  function scheduleNext() {
-    window.clearTimeout(timerId);
-    if (current === scenes.length - 1) return;
-    timerId = window.setTimeout(() => moveTo(current + 1), durationFor(scenes[current]));
-  }
-  function moveTo(nextIndex) {
-    if (transitionLocked || nextIndex < 0 || nextIndex >= scenes.length) return;
-    transitionLocked = true;
-    window.clearTimeout(timerId);
-    scenes[current].classList.remove("active");
-    current = nextIndex;
-    scenes[current].classList.add("active");
-    pauseAllVideos();
-    playCurrentVideo();
-    window.setTimeout(() => { transitionLocked = false; scheduleNext(); }, TRANSITION_MS);
-  }
-  function onTouchStart(event) {
-    const p = event.changedTouches[0];
-    touchStart = { x: p.clientX, y: p.clientY };
-  }
-  function onTouchEnd(event) {
-    if (!touchStart) return;
-    const p = event.changedTouches[0];
-    const dx = p.clientX - touchStart.x, dy = p.clientY - touchStart.y;
-    touchStart = null;
-    if (Math.abs(dy) < 48 || Math.abs(dy) < Math.abs(dx)) return;
-    moveTo(current + (dy < 0 ? 1 : -1));
-  }
-  window.addEventListener("touchstart", onTouchStart, { passive: true });
-  window.addEventListener("touchend", onTouchEnd, { passive: true });
-  window.addEventListener("keydown", event => {
-    if (event.key === "ArrowDown" || event.key === "PageDown") moveTo(current + 1);
-    if (event.key === "ArrowUp" || event.key === "PageUp") moveTo(current - 1);
-  });
-  pauseAllVideos();
-  playCurrentVideo();
-  scheduleNext();
+(()=>{
+"use strict";
+const scenes=[...document.querySelectorAll(".scene")];
+if(!scenes.length)return;
+let index=Math.max(0,scenes.findIndex(s=>s.classList.contains("active")));
+let timer=0,locked=false,touch=null;
+const STEP_MS=4500,FADE_MS=580;
+function clear(){if(timer){clearTimeout(timer);timer=0;}}
+function videos(){scenes.forEach((s,i)=>{const v=s.querySelector("video");if(!v)return;if(i===index){v.play().catch(()=>{});}else{v.pause();try{v.currentTime=0;}catch(_){}}});}
+function schedule(){clear();timer=setTimeout(()=>go(index+1,true),STEP_MS);}
+function go(next,automatic=false){
+if(locked)return;
+if(next>=scenes.length)next=0;
+if(next<0)next=scenes.length-1;
+if(next===index){if(!automatic)schedule();return;}
+locked=true;clear();
+scenes[index].classList.remove("active");
+index=next;scenes[index].classList.add("active");videos();
+setTimeout(()=>{locked=false;schedule();},FADE_MS);
+}
+function start(e){const p=e.changedTouches?e.changedTouches[0]:e;touch={x:p.clientX,y:p.clientY};}
+function end(e){if(!touch)return;const p=e.changedTouches?e.changedTouches[0]:e;const dx=p.clientX-touch.x,dy=p.clientY-touch.y;touch=null;if(Math.abs(dy)>42&&Math.abs(dy)>Math.abs(dx)*1.15)go(index+(dy<0?1:-1));}
+window.addEventListener("touchstart",start,{passive:true});
+window.addEventListener("touchend",end,{passive:true});
+window.addEventListener("keydown",e=>{if(e.key==="ArrowDown"||e.key==="PageDown"){e.preventDefault();go(index+1);}else if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();go(index-1);}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)clear();else schedule();});
+videos();schedule();
 })();
