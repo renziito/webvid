@@ -1,40 +1,59 @@
 (() => {
-  const scenes = [...document.querySelectorAll(".scene")];
-  const durations = [8000, 9000, 9000, 9000, 9000, 8000];
-  let current = 0;
-  let timer = null;
-  let touchStart = null;
-  let transitionLock = false;
+  "use strict";
 
-  function schedule() {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => show(current + 1), durations[current]);
+  const scenes = Array.from(document.querySelectorAll(".scene"));
+  if (!scenes.length) return;
+
+  let current = Math.max(0, scenes.findIndex(scene => scene.classList.contains("active")));
+  let timerId = null;
+  let transitionLocked = false;
+  let touchStart = null;
+  const TRANSITION_MS = 950;
+
+  function pauseAllVideos() {
+    scenes.forEach(scene => {
+      const video = scene.querySelector("video");
+      if (video) video.pause();
+    });
   }
 
-  function show(index) {
-    if (index < 0 || index >= scenes.length || transitionLock) return;
-    transitionLock = true;
-    window.clearTimeout(timer);
+  function playCurrentVideo() {
+    const video = scenes[current].querySelector("video");
+    if (!video) return;
+    try { video.currentTime = 0; } catch (_) {}
+    const promise = video.play();
+    if (promise && typeof promise.catch === "function") promise.catch(() => {});
+  }
+
+  function durationFor(scene) {
+    const configured = Number(scene.dataset.duration);
+    if (Number.isFinite(configured) && configured > 0) return configured;
+    const visibleText = scene.querySelector(".copy")?.innerText || "";
+    const words = visibleText.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(9000, 5000 + words * 360);
+  }
+
+  function scheduleNext() {
+    window.clearTimeout(timerId);
+    timerId = window.setTimeout(() => moveTo(current + 1), durationFor(scenes[current]));
+  }
+
+  function moveTo(nextIndex) {
+    if (transitionLocked || nextIndex < 0 || nextIndex >= scenes.length) return;
+    transitionLocked = true;
+    window.clearTimeout(timerId);
+
     scenes[current].classList.remove("active");
-    current = index;
+    current = nextIndex;
     scenes[current].classList.add("active");
 
-    scenes.forEach((scene, sceneIndex) => {
-      const video = scene.querySelector("video");
-      if (!video) return;
-      if (sceneIndex === current) {
-        try { video.currentTime = 0; } catch (_) {}
-        const playPromise = video.play();
-        if (playPromise && playPromise.catch) playPromise.catch(() => {});
-      } else {
-        video.pause();
-      }
-    });
+    pauseAllVideos();
+    playCurrentVideo();
 
     window.setTimeout(() => {
-      transitionLock = false;
-      schedule();
-    }, 850);
+      transitionLocked = false;
+      scheduleNext();
+    }, TRANSITION_MS);
   }
 
   function onTouchStart(event) {
@@ -46,17 +65,20 @@
     if (!touchStart) return;
     const point = event.changedTouches[0];
     const dx = point.clientX - touchStart.x;
-    const dy = point.y - touchStart.y;
+    const dy = point.clientY - touchStart.y;
     touchStart = null;
-    if (Math.abs(dy) > 45 && Math.abs(dy) > Math.abs(dx)) show(current + (dy < 0 ? 1 : -1));
+    if (Math.abs(dy) < 48 || Math.abs(dy) < Math.abs(dx)) return;
+    moveTo(current + (dy < 0 ? 1 : -1));
   }
 
   window.addEventListener("touchstart", onTouchStart, { passive: true });
   window.addEventListener("touchend", onTouchEnd, { passive: true });
   window.addEventListener("keydown", event => {
-    if (event.key === "ArrowDown" || event.key === "PageDown") show(current + 1);
-    if (event.key === "ArrowUp" || event.key === "PageUp") show(current - 1);
+    if (event.key === "ArrowDown" || event.key === "PageDown") moveTo(current + 1);
+    if (event.key === "ArrowUp" || event.key === "PageUp") moveTo(current - 1);
   });
 
-  schedule();
+  pauseAllVideos();
+  playCurrentVideo();
+  scheduleNext();
 })();
