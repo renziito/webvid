@@ -1,13 +1,13 @@
 {
   "title": "Sublimato — Sgt. Pepper’s Collection",
   "slug": "sublimato-sgt-peppers",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "status": "draft-review",
   "language": "es",
   "format": "9:16",
   "aspect_ratio": "9:16",
-  "estimated_visual_duration_seconds": 60,
+  "estimated_visual_duration_seconds": 48,
   "scenes": 6,
   "updated_at": "2026-11-21",
-  "description": "Experiencia visual vertical psicodélica inspirada en Sgt. Pepper’s y en la colección de piezas de Sublimato."
+  "description": "Experiencia visual vertical de seis escenas con textos legibles y avance automático temporizado."
 }
