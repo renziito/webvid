@@ -13,6 +13,13 @@
       "path": "./experiencias/inside-the-algorithm/",
       "category": "Tecnología",
       "accent": "#ff315f"
+    },
+    {
+      "title": "Sublimato — Sgt. Pepper’s Collection",
+      "description": "Una experiencia visual psicodélica inspirada en Sgt. Pepper’s y en la colección de piezas de Sublimato.",
+      "path": "./experiencias/sublimato-sgt-peppers/",
+      "category": "Música y coleccionismo",
+      "accent": "#f4c84b"
     }
   ]
 }
