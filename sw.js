@@ -1,4 +1,4 @@
-const VERSION = "v8";
+const VERSION = "v9";
 const SHELL_CACHE = "webvid-shell-" + VERSION;
 const RUNTIME_CACHE = "webvid-runtime-" + VERSION;
 const MAX_RUNTIME_ENTRIES = 120;
