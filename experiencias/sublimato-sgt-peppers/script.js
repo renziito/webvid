@@ -1,6 +1,6 @@
 (() => {
   const scenes = [...document.querySelectorAll(".scene")];
-  const durations = [7000, 8000, 10000, 8000, 8000, 7000];
+  const durations = [8000, 9000, 9000, 9000, 9000, 8000];
   let current = 0;
   let timer = null;
   let touchStart = null;
@@ -8,15 +8,14 @@
 
   function schedule() {
     window.clearTimeout(timer);
-    timer = window.setTimeout(() => show(current + 1, true), durations[current]);
+    timer = window.setTimeout(() => show(current + 1), durations[current]);
   }
 
-  function show(index, automatic = false) {
+  function show(index) {
     if (index < 0 || index >= scenes.length || transitionLock) return;
     transitionLock = true;
     window.clearTimeout(timer);
-    const previous = current;
-    scenes[previous].classList.remove("active");
+    scenes[current].classList.remove("active");
     current = index;
     scenes[current].classList.add("active");
 
@@ -26,7 +25,7 @@
       if (sceneIndex === current) {
         try { video.currentTime = 0; } catch (_) {}
         const playPromise = video.play();
-        if (playPromise?.catch) playPromise.catch(() => {});
+        if (playPromise && playPromise.catch) playPromise.catch(() => {});
       } else {
         video.pause();
       }
@@ -47,7 +46,7 @@
     if (!touchStart) return;
     const point = event.changedTouches[0];
     const dx = point.clientX - touchStart.x;
-    const dy = point.clientY - touchStart.y;
+    const dy = point.y - touchStart.y;
     touchStart = null;
     if (Math.abs(dy) > 45 && Math.abs(dy) > Math.abs(dx)) show(current + (dy < 0 ? 1 : -1));
   }
